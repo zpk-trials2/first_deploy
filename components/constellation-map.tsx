@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 
 const stars = [
@@ -30,15 +30,21 @@ function Star({
   index, 
   isHovered, 
   hoveredIndex,
-  onHover 
+  onHover,
+  proximityScale,
 }: { 
   star: typeof stars[0]
   index: number
   isHovered: boolean
   hoveredIndex: number | null
-  onHover: (index: number | null) => void 
+  onHover: (index: number | null) => void
+  proximityScale: number
 }) {
   const isDimmed = hoveredIndex !== null && !isHovered
+  // Calculate the effective scale: base is 1, proximity adds up to 1.5x, hover adds more
+  const baseScale = 1 + (proximityScale * 1.5)
+  const finalScale = isHovered ? baseScale * 1.4 : baseScale
+  const glowRadius = 10 + (proximityScale * 12) + (isHovered ? 6 : 0)
 
   return (
     <g>
@@ -46,14 +52,14 @@ function Star({
       <circle
         cx={`${star.x}%`}
         cy={`${star.y}%`}
-        r={isHovered ? 16 : 10}
+        r={glowRadius}
         fill={star.color}
-        opacity={isHovered ? 0.3 : 0.15}
-        style={{ transition: 'all 0.3s ease' }}
+        opacity={isHovered ? 0.35 : 0.1 + (proximityScale * 0.2)}
+        style={{ transition: 'all 0.15s ease-out' }}
       />
       
       {/* Star core */}
-      <motion.circle
+      <circle
         cx={`${star.x}%`}
         cy={`${star.y}%`}
         r={6}
@@ -61,10 +67,12 @@ function Star({
         opacity={isDimmed ? 0.3 : 1}
         style={{ 
           cursor: 'pointer',
-          filter: `drop-shadow(0 0 8px ${star.color})`,
+          filter: `drop-shadow(0 0 ${8 + proximityScale * 12}px ${star.color})`,
+          transform: `scale(${finalScale})`,
+          transformOrigin: `${star.x}% ${star.y}%`,
+          transformBox: 'fill-box',
+          transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
         }}
-        animate={isHovered ? { scale: [1, 2, 1.4] } : { scale: 1 }}
-        transition={{ type: 'spring', damping: 10, stiffness: 200 }}
         onMouseEnter={() => onHover(index)}
         onMouseLeave={() => onHover(null)}
         onClick={() => onHover(isHovered ? null : index)}
@@ -99,20 +107,51 @@ function Tooltip({ star, isMobile }: { star: typeof stars[0]; isMobile: boolean 
 
 export function ConstellationMap() {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [backgroundStars, setBackgroundStars] = useState<Array<{ x: number; y: number; opacity: number }>>([])
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+  const [proximityScales, setProximityScales] = useState<number[]>(stars.map(() => 0))
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768)
     // Generate random background stars
-    const stars = Array.from({ length: 80 }, () => ({
+    const bgStars = Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
       opacity: 0.1 + Math.random() * 0.3,
     }))
-    setBackgroundStars(stars)
+    setBackgroundStars(bgStars)
+  }, [])
+
+  // Calculate proximity scales based on mouse position
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !mapRef.current) return
+    
+    const rect = mapRef.current.getBoundingClientRect()
+    const mouseX = ((e.clientX - rect.left) / rect.width) * 100
+    const mouseY = ((e.clientY - rect.top) / rect.height) * 100
+    
+    setMousePos({ x: mouseX, y: mouseY })
+    
+    // Calculate proximity for each star (0 to 1, where 1 is closest)
+    const maxDistance = 20 // percentage units for max effect range
+    const newScales = stars.map(star => {
+      const dx = star.x - mouseX
+      const dy = star.y - mouseY
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      // Convert distance to scale (0 when far, 1 when at star)
+      return Math.max(0, 1 - (distance / maxDistance))
+    })
+    
+    setProximityScales(newScales)
+  }, [isMobile])
+
+  const handleMouseLeave = useCallback(() => {
+    setMousePos(null)
+    setProximityScales(stars.map(() => 0))
   }, [])
 
   return (
@@ -144,8 +183,20 @@ export function ConstellationMap() {
           </motion.span>
         </motion.h2>
 
+        {/* Interaction Hint */}
+        <motion.p
+          className="text-center mb-4 font-mono text-xs"
+          style={{ color: '#64748b' }}
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.3 }}
+        >
+          {isMobile ? '[ tap on a star to reveal ]' : '[ hover over a star to reveal ]'}
+        </motion.p>
+
         {/* Star Map Container */}
         <motion.div
+          ref={mapRef}
           className="relative w-full rounded-2xl overflow-hidden"
           style={{
             height: isMobile ? '400px' : '500px',
@@ -155,6 +206,8 @@ export function ConstellationMap() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.8 }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Background stars */}
           <svg className="absolute inset-0 w-full h-full">
@@ -194,6 +247,7 @@ export function ConstellationMap() {
                 isHovered={hoveredIndex === index}
                 hoveredIndex={hoveredIndex}
                 onHover={setHoveredIndex}
+                proximityScale={proximityScales[index]}
               />
             ))}
           </svg>

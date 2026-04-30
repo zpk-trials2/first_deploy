@@ -171,7 +171,7 @@ function DashboardCard({ title, children, className = '', accentColor = '#00d4ff
   return (
     <motion.div
       ref={ref}
-      className={`rounded-xl p-4 sm:p-6 ${className}`}
+      className={`rounded-xl p-3 sm:p-4 ${className}`}
       style={{ 
         background: 'rgba(255, 255, 255, 0.03)',
         backdropFilter: 'blur(24px)',
@@ -189,7 +189,7 @@ function DashboardCard({ title, children, className = '', accentColor = '#00d4ff
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <h3 className="font-mono text-xs sm:text-sm mb-3 sm:mb-4" style={{ color: '#00d4ff' }}>{title}</h3>
+      <h3 className="font-mono text-xs sm:text-sm mb-2 sm:mb-3" style={{ color: '#00d4ff' }}>{title}</h3>
       {children}
     </motion.div>
   )
@@ -234,7 +234,7 @@ function CompatibilityCard() {
   return (
     <motion.div
       ref={ref}
-      className="rounded-xl p-4 sm:p-6 md:col-span-2"
+      className="rounded-xl p-3 sm:p-4 md:col-span-2"
       style={{ 
         background: 'rgba(255, 255, 255, 0.03)',
         backdropFilter: 'blur(24px)',
@@ -250,10 +250,10 @@ function CompatibilityCard() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <h3 className="font-mono text-xs sm:text-sm mb-4" style={{ color: '#00d4ff' }}>COMPATIBILITY.exe</h3>
+      <h3 className="font-mono text-xs sm:text-sm mb-3" style={{ color: '#00d4ff' }}>COMPATIBILITY.exe</h3>
       
       {/* LAYER 1 - Dual Concentric Rings */}
-      <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-4">
         <svg className="w-40 h-40" viewBox="0 0 140 140">
           <defs>
             <filter id="outerGlow" x="-50%" y="-50%" width="200%" height="200%">
@@ -335,7 +335,7 @@ function CompatibilityCard() {
       </div>
 
       {/* LAYER 2 - Compatibility Breakdown Bars */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2 mb-4">
         {compatibilityBars.map((bar, index) => (
           <motion.div 
             key={bar.label}
@@ -386,9 +386,9 @@ function RadarChartWithEffects() {
   const isInView = useInView(chartRef, { once: true })
 
   return (
-    <div ref={chartRef} className="relative w-full" style={{ height: 280, minHeight: 280 }}>
-      <ResponsiveContainer width="100%" height={280}>
-        <RadarChart data={traits} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+    <div ref={chartRef} className="relative w-full" style={{ height: 220, minHeight: 220 }}>
+      <ResponsiveContainer width="100%" height={220}>
+        <RadarChart data={traits} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
           <defs>
             <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#00d4ff" stopOpacity={0.3} />
@@ -413,16 +413,16 @@ function RadarChartWithEffects() {
       {/* Sonar sweep overlay */}
       {isInView && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <svg className="w-full h-full" viewBox="0 0 280 280">
+          <svg className="w-full h-full" viewBox="0 0 220 220">
             <line
-              x1="140"
-              y1="140"
-              x2="140"
-              y2="30"
+              x1="110"
+              y1="110"
+              x2="110"
+              y2="20"
               stroke="rgba(0, 212, 255, 0.25)"
               strokeWidth="1"
               className="animate-sonar-sweep"
-              style={{ transformOrigin: '140px 140px' }}
+              style={{ transformOrigin: '110px 110px' }}
             />
           </svg>
         </div>
@@ -443,14 +443,14 @@ export function PersonalityDashboard() {
   return (
     <section 
       ref={sectionRef} 
-      className="relative py-12 sm:py-16 md:py-20 px-4 overflow-hidden"
+      className="relative py-10 sm:py-12 md:py-16 px-4 overflow-hidden"
       style={{
         background: 'radial-gradient(ellipse at 80% 0%, #0f0a1e 0%, #020408 60%)',
       }}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <motion.h2
-          className="font-mono text-base sm:text-lg md:text-xl mb-8 sm:mb-12 flex items-center gap-2"
+          className="font-mono text-base sm:text-lg md:text-xl mb-6 sm:mb-8 flex items-center gap-2"
           style={{ color: '#00d4ff' }}
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
@@ -459,32 +459,32 @@ export function PersonalityDashboard() {
           <span className="animate-pulse">▋</span>
         </motion.h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 auto-rows-fr">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           {/* Radar Chart */}
-          <DashboardCard title="PERSONALITY_MATRIX.json" className="md:col-span-2 md:row-span-2" accentColor="#00d4ff">
+          <DashboardCard title="PERSONALITY_MATRIX.json" className="md:col-span-2" accentColor="#00d4ff">
             <RadarChartWithEffects />
           </DashboardCard>
 
           {/* Friendship Age */}
           <DashboardCard title="FRIENDSHIP_AGE.log" accentColor="#bf5af2">
-            <div className="text-center flex flex-col items-center justify-center h-full py-2">
-              <p className="mb-2 text-sm sm:text-base" style={{ color: '#94a3b8' }}>{"We've been friends for"}</p>
+            <div className="text-center flex flex-col items-center justify-center py-1">
+              <p className="mb-1 text-xs sm:text-sm" style={{ color: '#94a3b8' }}>{"We've been friends for"}</p>
               <AnimatedCounter target={friendshipDays} />
-              <p className="mt-2 text-sm sm:text-base" style={{ color: '#94a3b8' }}>days</p>
+              <p className="mt-1 text-xs sm:text-sm" style={{ color: '#94a3b8' }}>days</p>
             </div>
           </DashboardCard>
 
           {/* Messages Counter */}
           <DashboardCard title="MESSAGES_EXCHANGED" accentColor="#ff375f">
-            <div className="text-center flex flex-col items-center justify-center h-full py-2">
+            <div className="text-center flex flex-col items-center justify-center py-1">
               <AnimatedCounter target={10000} suffix="+" />
-              <p className="mt-2 text-sm sm:text-base" style={{ color: '#94a3b8' }}>and counting...</p>
+              <p className="mt-1 text-xs sm:text-sm" style={{ color: '#94a3b8' }}>and counting...</p>
             </div>
           </DashboardCard>
 
           {/* 4-row Marquee */}
           <DashboardCard title="SHARED_INTERESTS[]" className="md:col-span-2 overflow-hidden" accentColor="#ffd60a">
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               <MarqueeRow items={row1} duration={28} />
               <MarqueeRow items={row2} duration={38} reverse />
               <MarqueeRow items={row3} duration={22} />
