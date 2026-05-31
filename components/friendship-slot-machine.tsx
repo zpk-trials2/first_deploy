@@ -14,7 +14,6 @@ const REEL_1_SYMBOLS = ['🪖', '💣', '⚡', '🎯', 'DKS', '🔥', 'CHAOS']
 const REEL_2_SYMBOLS = ['❤️', '🪖', 'LOCKED', '💥', '🎯', 'DKS', '⚡']
 const REEL_3_SYMBOLS = ['🪖', 'CHAOS', '💣', 'DKS', '🔥', '🎯', '❤️']
 
-// Jackpot logic: appears on 3rd spin, then every 5th/6th/9th after
 const getJackpotSpins = (): number[] => {
   const spins = [3]
   let current = 3
@@ -35,7 +34,6 @@ export function FriendshipSlotMachine() {
   const [showFlash, setShowFlash] = useState(false)
   const [reelBlurs, setReelBlurs] = useState([false, false, false])
   const [leverRotate, setLeverRotate] = useState(0)
-  const [displayParallax, setDisplayParallax] = useState(0)
   
   const jackpotSpins = useRef(getJackpotSpins())
   const animFrameRefs = useRef<NodeJS.Timeout[]>([])
@@ -57,7 +55,6 @@ export function FriendshipSlotMachine() {
     setShowFlash(false)
     setReelBlurs([false, false, false])
     setLeverRotate(0)
-    setDisplayParallax(0)
   }
 
   const triggerJackpot = () => {
@@ -68,40 +65,34 @@ export function FriendshipSlotMachine() {
 
     animFrameRefs.current.push(
       setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).confetti) {
-          (window as any).confetti({
-            particleCount: 120,
-            spread: 90,
-            origin: { x: 0.5, y: 0.6 },
-            colors: ['#ffd60a', '#ff9f0a', '#ff375f', '#00d4ff'],
-          })
-        }
+        confetti({
+          particleCount: 120,
+          spread: 90,
+          origin: { x: 0.5, y: 0.6 },
+          colors: ['#ffd60a', '#ff9f0a', '#ff375f', '#00d4ff'],
+        })
       }, 600)
     )
 
     animFrameRefs.current.push(
       setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).confetti) {
-          (window as any).confetti({
-            particleCount: 80,
-            spread: 120,
-            origin: { x: 0.2, y: 0.5 },
-            colors: ['#ffd60a', '#ffffff'],
-          })
-        }
+        confetti({
+          particleCount: 80,
+          spread: 120,
+          origin: { x: 0.2, y: 0.5 },
+          colors: ['#ffd60a', '#ffffff'],
+        })
       }, 900)
     )
 
     animFrameRefs.current.push(
       setTimeout(() => {
-        if (typeof window !== 'undefined' && (window as any).confetti) {
-          (window as any).confetti({
-            particleCount: 80,
-            spread: 120,
-            origin: { x: 0.8, y: 0.5 },
-            colors: ['#ffd60a', '#ffffff'],
-          })
-        }
+        confetti({
+          particleCount: 80,
+          spread: 120,
+          origin: { x: 0.8, y: 0.5 },
+          colors: ['#ffd60a', '#ffffff'],
+        })
       }, 1200)
     )
 
@@ -120,19 +111,12 @@ export function FriendshipSlotMachine() {
     const newSpinCount = spinCount + 1
     setSpinCount(newSpinCount)
 
-    // Lever animation: pull down then back up
-    setLeverRotate(-45)
+    // Lever pull animation
+    setLeverRotate(45)
     animFrameRefs.current.push(
       setTimeout(() => {
         setLeverRotate(0)
-      }, 600)
-    )
-
-    // Parallax display movement during spin
-    animFrameRefs.current.push(
-      setTimeout(() => {
-        setDisplayParallax(-8)
-      }, 50)
+      }, 800)
     )
 
     // Reel 1 cycles for 800ms
@@ -198,8 +182,6 @@ export function FriendshipSlotMachine() {
           clearInterval(cyclingRefs.current[0])
           cyclingRefs.current.shift()
         }
-        // Return display to normal position
-        setDisplayParallax(0)
       }, 1800)
     )
 
@@ -243,39 +225,29 @@ export function FriendshipSlotMachine() {
         {isSlotOpen && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden cursor-auto"
-            style={{ cursor: 'auto' }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* Military background with camo pattern */}
-            <div
-              className="absolute inset-0 z-0"
-              style={{
-                background: `
-                  repeating-linear-gradient(
-                    45deg,
-                    #1a2410,
-                    #1a2410 10px,
-                    #0d1a06 10px,
-                    #0d1a06 20px
-                  ),
-                  repeating-linear-gradient(
-                    -45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(0, 0, 0, 0.2) 10px,
-                    rgba(0, 0, 0, 0.2) 20px
-                  ),
-                  radial-gradient(ellipse 150px 100px at 30% 20%, #2d3a1a, transparent),
-                  radial-gradient(ellipse 120px 140px at 70% 60%, #0f1a08, transparent)
-                `,
-                backgroundSize: '100% 100%, 100% 100%, 200% 200%, 200% 200%',
-              }}
-            />
+            {/* 360 Panorama Background */}
+            <div className="absolute inset-0 w-full h-full z-0">
+              <iframe
+                width="100%"
+                height="100%"
+                allowFullScreen={true}
+                allow="accelerometer; magnetometer; gyroscope; xr-spatial-tracking"
+                style={{
+                  display: 'block',
+                  border: 'none',
+                  borderRadius: '0',
+                  maxWidth: 'none',
+                }}
+                src="https://panoraven.com/en/embed/ljoSJ2eLag"
+              />
+            </div>
 
-            {/* Semi-transparent overlay for depth */}
-            <div className="absolute inset-0 bg-black/40 z-0" />
+            {/* Semi-transparent overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/30 z-0" />
 
             {/* Close button */}
             <button
@@ -300,12 +272,12 @@ export function FriendshipSlotMachine() {
               />
             )}
 
-            {/* Content */}
+            {/* Content Container */}
             <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6 px-4">
               {/* Header */}
               <div className="text-center">
-                <div className="font-mono text-xs tracking-widest text-[#6b7c3f]">
-                  🎖️ OPERATION: JACKPOT // CLASSIFIED CASINO 🎖️
+                <div className="font-mono text-xs tracking-widest text-[#ffd60a]">
+                  🎖️ FRIENDSHIP SLOT MACHINE 🎖️
                 </div>
                 <div
                   className="h-px w-80 mx-auto mt-3"
@@ -318,233 +290,221 @@ export function FriendshipSlotMachine() {
                 SPINS: {spinCount}
               </div>
 
-              {/* 3D Slot Machine */}
+              {/* Main Slot Machine - Front view with 3D styling */}
               <motion.div
-                className="relative max-w-[420px] w-full"
+                className="relative w-full max-w-md"
                 style={{
                   perspective: '1200px',
-                  transformStyle: 'preserve-3d',
-                  transform: 'rotateY(-15deg) rotateX(5deg) rotateZ(2deg)',
                 }}
               >
-                {/* 3D Outer Frame */}
+                {/* Outer Frame - Polished metal */}
                 <div
-                  className="relative"
+                  className="relative rounded-3xl p-8 overflow-hidden"
                   style={{
                     background: `
                       linear-gradient(
-                        180deg,
-                        #3d4a2a 0%,
-                        #2d3a1a 25%,
-                        #1c2b0e 75%,
-                        #0a1505 100%
+                        145deg,
+                        #2d3f1a 0%,
+                        #1a2410 40%,
+                        #0d1506 80%,
+                        #050a03 100%
                       )
                     `,
-                    border: '12px solid',
-                    borderColor: '#5a6a3a',
-                    borderRadius: '24px',
+                    border: '16px solid',
+                    borderColor: '#6a8a3a',
                     boxShadow: `
-                      0 30px 80px rgba(0, 0, 0, 0.95),
-                      inset 0 1px 0 rgba(255,255,255,0.15),
-                      inset 0 -2px 8px rgba(0, 0, 0, 0.8),
-                      inset -8px 0 30px rgba(0, 0, 0, 0.5),
-                      inset 8px 0 30px rgba(0, 0, 0, 0.3),
-                      0 0 50px rgba(255, 214, 10, 0.15),
-                      0 0 100px rgba(0, 0, 0, 0.6)
+                      0 40px 100px rgba(0, 0, 0, 0.95),
+                      inset 0 2px 0 rgba(255,255,255,0.2),
+                      inset 0 -4px 12px rgba(0, 0, 0, 0.9),
+                      inset -10px 0 40px rgba(0, 0, 0, 0.6),
+                      inset 10px 0 40px rgba(0, 0, 0, 0.4),
+                      0 0 80px rgba(255, 214, 10, 0.2),
+                      0 0 150px rgba(0, 0, 0, 0.7)
                     `,
-                    padding: '36px 32px',
-                    position: 'relative',
                   }}
                 >
-                  {/* Brushed metal top bezel with realistic lighting */}
+                  {/* Top Bezel */}
                   <div
-                    className="absolute top-0 left-0 right-0 h-10"
+                    className="absolute top-0 left-0 right-0 h-12 rounded-t-3xl"
                     style={{
                       background: `
                         linear-gradient(
                           180deg,
-                          #6a7a4a 0%,
-                          #5a6a3a 40%,
-                          #4a5a2a 100%
+                          #8a9a6a 0%,
+                          #6a8a3a 50%,
+                          #4a6a1a 100%
                         )
                       `,
-                      borderRadius: '22px 22px 0 0',
                       boxShadow: `
-                        inset 0 1px 2px rgba(255,255,255,0.2),
-                        inset 0 -1px 3px rgba(0,0,0,0.6),
-                        0 4px 12px rgba(0,0,0,0.5),
+                        inset 0 2px 4px rgba(255,255,255,0.25),
+                        inset 0 -2px 6px rgba(0,0,0,0.7),
+                        0 6px 20px rgba(0,0,0,0.6),
                         repeating-linear-gradient(
                           90deg,
                           transparent,
-                          transparent 2px,
-                          rgba(0,0,0,0.1) 2px,
-                          rgba(0,0,0,0.1) 4px
+                          transparent 3px,
+                          rgba(0,0,0,0.08) 3px,
+                          rgba(0,0,0,0.08) 6px
                         )
                       `,
                     }}
                   />
 
-                  {/* Machine label with enhanced glow */}
+                  {/* Machine Title */}
                   <div
-                    className="font-mono text-xs text-center tracking-widest mb-6"
+                    className="font-mono text-sm text-center tracking-wider mb-6 pt-2"
                     style={{
                       color: '#ffd60a',
-                      textShadow: '0 0 20px #ffd60a, 0 0 40px rgba(255,214,10,0.4), 0 2px 4px rgba(0,0,0,0.8)',
-                      letterSpacing: '0.2em',
+                      textShadow: '0 0 30px #ffd60a, 0 0 60px rgba(255,214,10,0.3), 0 3px 6px rgba(0,0,0,0.9)',
+                      letterSpacing: '0.3em',
                       fontWeight: 'bold',
                     }}
                   >
                     ◈ FRIENDSHIP PROTOCOL ◈
                   </div>
 
-                  {/* 3D Display Housing with recessed appearance */}
+                  {/* Display Window */}
                   <motion.div
                     className="relative rounded-xl overflow-hidden mb-6"
                     style={{
                       background: `
                         linear-gradient(
                           135deg,
-                          #0f1a08 0%,
-                          #050a03 100%
+                          #050a03 0%,
+                          #030603 100%
                         )
                       `,
-                      border: '4px solid #ffd60a',
+                      border: '6px solid #ffd60a',
                       boxShadow: `
-                        inset 0 0 60px rgba(0, 0, 0, 1),
-                        inset 0 8px 30px rgba(0, 0, 0, 0.95),
-                        inset 0 -8px 30px rgba(0, 0, 0, 0.8),
-                        inset -6px 0 20px rgba(0, 0, 0, 0.7),
-                        inset 6px 0 20px rgba(0, 0, 0, 0.7),
-                        0 0 40px rgba(255, 214, 10, 0.25),
-                        0 12px 50px rgba(0, 0, 0, 0.6),
-                        0 1px 0 rgba(255,255,255,0.08) inset
+                        inset 0 0 80px rgba(0, 0, 0, 1),
+                        inset 0 12px 40px rgba(0, 0, 0, 0.95),
+                        inset 0 -12px 40px rgba(0, 0, 0, 0.8),
+                        inset -8px 0 30px rgba(0, 0, 0, 0.8),
+                        inset 8px 0 30px rgba(0, 0, 0, 0.8),
+                        0 0 60px rgba(255, 214, 10, 0.35),
+                        0 16px 60px rgba(0, 0, 0, 0.7)
                       `,
-                      padding: '6px',
+                      padding: '8px',
                     }}
-                    animate={{
-                      y: displayParallax,
-                      rotateX: displayParallax * 2,
-                    }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                   >
-                    {/* Reels window with glass-like appearance */}
+                    {/* Reels Container */}
                     <div
-                      className="bg-black rounded-lg p-5 flex gap-4 justify-center"
+                      className="bg-black rounded-lg p-6 flex gap-5 justify-center"
                       style={{
                         background: `
                           linear-gradient(
                             180deg,
-                            #030606 0%,
+                            #0a0c08 0%,
                             #000000 50%,
-                            #050805 100%
+                            #0a0c08 100%
                           )
                         `,
                         boxShadow: `
-                          inset 0 0 40px rgba(0,0,0,1),
-                          inset 0 1px 2px rgba(255,255,255,0.05),
-                          inset 0 2px 8px rgba(0,0,0,0.9)
+                          inset 0 0 60px rgba(0,0,0,1),
+                          inset 0 2px 3px rgba(255,255,255,0.03),
+                          inset 0 3px 12px rgba(0,0,0,0.95)
                         `,
                       }}
                     >
-                      {/* Reel 1 - Realistic 3D reel */}
+                      {/* Reel 1 */}
                       <motion.div
-                        className="w-24 h-24 rounded-lg border-2 flex items-center justify-center text-3xl font-bold"
+                        className="w-28 h-28 rounded-xl border-3 flex items-center justify-center text-5xl font-bold"
                         style={{
                           background: `
                             linear-gradient(
                               135deg,
-                              #0a1006 0%,
-                              #050803 50%,
-                              #030505 100%
+                              #0a100a 0%,
+                              #050805 50%,
+                              #030603 100%
                             )
                           `,
                           borderColor: '#ffd60a',
-                          textShadow: '0 0 16px rgba(255,214,10,0.8), 0 0 32px rgba(255,214,10,0.3), 0 2px 5px rgba(0,0,0,0.9)',
+                          textShadow: '0 0 20px rgba(255,214,10,0.9), 0 0 40px rgba(255,214,10,0.4), 0 3px 8px rgba(0,0,0,0.95)',
                           boxShadow: `
-                            inset 0 0 25px rgba(0,0,0,1),
-                            inset 0 2px 8px rgba(0,0,0,0.95),
-                            inset -3px -3px 15px rgba(0,0,0,0.9),
-                            inset 3px 3px 15px rgba(255,214,10,0.08),
-                            0 0 20px rgba(255, 214, 10, 0.2),
-                            0 8px 20px rgba(0, 0, 0, 0.5)
+                            inset 0 0 35px rgba(0,0,0,1),
+                            inset 0 3px 12px rgba(0,0,0,0.98),
+                            inset -4px -4px 20px rgba(0,0,0,0.95),
+                            inset 4px 4px 20px rgba(255,214,10,0.1),
+                            0 0 30px rgba(255, 214, 10, 0.25),
+                            0 12px 30px rgba(0, 0, 0, 0.6)
                           `,
                         }}
                         animate={{
-                          rotateY: isSpinning ? 360 : 0,
-                          filter: reelBlurs[0] ? 'blur(2px)' : 'blur(0)',
+                          rotateY: isSpinning ? [0, 360] : 0,
+                          filter: reelBlurs[0] ? 'blur(3px)' : 'blur(0)',
                         }}
-                        transition={{ duration: 0.3, repeat: isSpinning ? Infinity : 0 }}
+                        transition={{ duration: 0.4, repeat: isSpinning ? Infinity : 0 }}
                       >
                         {reelValues[0]}
                       </motion.div>
 
-                      {/* Reel 2 - Realistic 3D reel */}
+                      {/* Reel 2 */}
                       <motion.div
-                        className="w-24 h-24 rounded-lg border-2 flex items-center justify-center text-3xl font-bold"
+                        className="w-28 h-28 rounded-xl border-3 flex items-center justify-center text-5xl font-bold"
                         style={{
                           background: `
                             linear-gradient(
                               135deg,
-                              #0a1006 0%,
-                              #050803 50%,
-                              #030505 100%
+                              #0a100a 0%,
+                              #050805 50%,
+                              #030603 100%
                             )
                           `,
                           borderColor: '#ffd60a',
-                          textShadow: '0 0 16px rgba(255,214,10,0.8), 0 0 32px rgba(255,214,10,0.3), 0 2px 5px rgba(0,0,0,0.9)',
+                          textShadow: '0 0 20px rgba(255,214,10,0.9), 0 0 40px rgba(255,214,10,0.4), 0 3px 8px rgba(0,0,0,0.95)',
                           boxShadow: `
-                            inset 0 0 25px rgba(0,0,0,1),
-                            inset 0 2px 8px rgba(0,0,0,0.95),
-                            inset -3px -3px 15px rgba(0,0,0,0.9),
-                            inset 3px 3px 15px rgba(255,214,10,0.08),
-                            0 0 20px rgba(255, 214, 10, 0.2),
-                            0 8px 20px rgba(0, 0, 0, 0.5)
+                            inset 0 0 35px rgba(0,0,0,1),
+                            inset 0 3px 12px rgba(0,0,0,0.98),
+                            inset -4px -4px 20px rgba(0,0,0,0.95),
+                            inset 4px 4px 20px rgba(255,214,10,0.1),
+                            0 0 30px rgba(255, 214, 10, 0.25),
+                            0 12px 30px rgba(0, 0, 0, 0.6)
                           `,
                         }}
                         animate={{
-                          rotateY: isSpinning ? 360 : 0,
-                          filter: reelBlurs[1] ? 'blur(2px)' : 'blur(0)',
+                          rotateY: isSpinning ? [0, 360] : 0,
+                          filter: reelBlurs[1] ? 'blur(3px)' : 'blur(0)',
                         }}
-                        transition={{ duration: 0.3, repeat: isSpinning ? Infinity : 0 }}
+                        transition={{ duration: 0.4, repeat: isSpinning ? Infinity : 0 }}
                       >
                         {reelValues[1]}
                       </motion.div>
 
-                      {/* Reel 3 - Realistic 3D reel */}
+                      {/* Reel 3 */}
                       <motion.div
-                        className="w-24 h-24 rounded-lg border-2 flex items-center justify-center text-3xl font-bold"
+                        className="w-28 h-28 rounded-xl border-3 flex items-center justify-center text-5xl font-bold"
                         style={{
                           background: `
                             linear-gradient(
                               135deg,
-                              #0a1006 0%,
-                              #050803 50%,
-                              #030505 100%
+                              #0a100a 0%,
+                              #050805 50%,
+                              #030603 100%
                             )
                           `,
                           borderColor: '#ffd60a',
-                          textShadow: '0 0 16px rgba(255,214,10,0.8), 0 0 32px rgba(255,214,10,0.3), 0 2px 5px rgba(0,0,0,0.9)',
+                          textShadow: '0 0 20px rgba(255,214,10,0.9), 0 0 40px rgba(255,214,10,0.4), 0 3px 8px rgba(0,0,0,0.95)',
                           boxShadow: `
-                            inset 0 0 25px rgba(0,0,0,1),
-                            inset 0 2px 8px rgba(0,0,0,0.95),
-                            inset -3px -3px 15px rgba(0,0,0,0.9),
-                            inset 3px 3px 15px rgba(255,214,10,0.08),
-                            0 0 20px rgba(255, 214, 10, 0.2),
-                            0 8px 20px rgba(0, 0, 0, 0.5)
+                            inset 0 0 35px rgba(0,0,0,1),
+                            inset 0 3px 12px rgba(0,0,0,0.98),
+                            inset -4px -4px 20px rgba(0,0,0,0.95),
+                            inset 4px 4px 20px rgba(255,214,10,0.1),
+                            0 0 30px rgba(255, 214, 10, 0.25),
+                            0 12px 30px rgba(0, 0, 0, 0.6)
                           `,
                         }}
                         animate={{
-                          rotateY: isSpinning ? 360 : 0,
-                          filter: reelBlurs[2] ? 'blur(2px)' : 'blur(0)',
+                          rotateY: isSpinning ? [0, 360] : 0,
+                          filter: reelBlurs[2] ? 'blur(3px)' : 'blur(0)',
                         }}
-                        transition={{ duration: 0.3, repeat: isSpinning ? Infinity : 0 }}
+                        transition={{ duration: 0.4, repeat: isSpinning ? Infinity : 0 }}
                       >
                         {reelValues[2]}
                       </motion.div>
                     </div>
                   </motion.div>
 
-                  {/* Scanline */}
+                  {/* Scanline effect */}
                   <motion.div
                     className="h-0.5 bg-gradient-to-r from-transparent via-[rgba(255,214,10,0.3)] to-transparent mb-4"
                     animate={{
@@ -557,7 +517,7 @@ export function FriendshipSlotMachine() {
                     }}
                   />
 
-                  {/* Result line */}
+                  {/* Status Text */}
                   {!isSpinning && !jackpotTriggered && (
                     <div className="font-mono text-xs text-center text-white/40 mb-6">
                       // PULL LEVER TO SPIN
@@ -569,13 +529,13 @@ export function FriendshipSlotMachine() {
                     </div>
                   )}
 
-                  {/* 3D Lever with Animation */}
+                  {/* 3D Lever with improved styling */}
                   <motion.button
                     onClick={spinReels}
                     disabled={isSpinning}
-                    className="absolute right-6 top-1/2 transform -translate-y-1/2 cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+                    className="mx-auto block cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
                     style={{
-                      transformStyle: 'preserve-3d',
+                      perspective: '1200px',
                     }}
                   >
                     <motion.div
@@ -583,58 +543,59 @@ export function FriendshipSlotMachine() {
                       animate={{ rotate: leverRotate }}
                       transition={{
                         type: 'spring',
-                        stiffness: 200,
-                        damping: 15,
+                        stiffness: 180,
+                        damping: 20,
                       }}
                       style={{
                         transformOrigin: 'bottom center',
                         transformStyle: 'preserve-3d',
                       }}
                     >
-                      {/* Ball */}
+                      {/* Knob */}
                       <motion.div
-                        className="w-7 h-7 rounded-full"
+                        className="w-9 h-9 rounded-full mb-1"
                         style={{
                           background: `
-                            radial-gradient(circle at 30% 30%, #ff7a7a, #ff3838, #8b0000)
+                            radial-gradient(circle at 35% 35%, #ff8a5a, #ff5a3a, #9b2a0a)
                           `,
                           boxShadow: `
-                            0 0 18px rgba(255,100,100,0.9),
-                            inset -3px -3px 8px rgba(0,0,0,0.6),
-                            inset 2px 2px 8px rgba(255,180,180,0.4),
-                            0 6px 16px rgba(0,0,0,0.5),
-                            0 1px 0 rgba(255,255,255,0.15) inset
+                            0 0 25px rgba(255,100,80,1),
+                            inset -4px -4px 12px rgba(0,0,0,0.7),
+                            inset 3px 3px 12px rgba(255,200,180,0.5),
+                            0 8px 20px rgba(0,0,0,0.6),
+                            0 1px 0 rgba(255,255,255,0.2) inset
                           `,
                         }}
+                        whileHover={!isSpinning ? { scale: 1.1 } : {}}
                       />
                       {/* Shaft */}
                       <div
-                        className="w-2.5 h-24"
+                        className="w-3 h-32"
                         style={{
                           background: `
-                            linear-gradient(90deg, #3a4a1a 0%, #5a7a3a 45%, #4a5a2a 55%, #2a3a0a 100%)
+                            linear-gradient(90deg, #4a6a2a 0%, #7a9a5a 50%, #5a7a3a 100%)
                           `,
-                          borderRadius: '2px',
+                          borderRadius: '3px',
                           boxShadow: `
-                            0 6px 16px rgba(0,0,0,0.7),
-                            inset -1px 0 3px rgba(0,0,0,0.6),
-                            inset 1px 0 3px rgba(255,255,255,0.12),
-                            0 1px 2px rgba(255,255,255,0.08) inset
+                            0 8px 24px rgba(0,0,0,0.8),
+                            inset -2px 0 4px rgba(0,0,0,0.7),
+                            inset 2px 0 4px rgba(255,255,255,0.15),
+                            0 2px 3px rgba(255,255,255,0.1) inset
                           `,
                         }}
                       />
                       {/* Base */}
                       <div
-                        className="w-8 h-5 rounded-full border-2"
+                        className="w-10 h-6 rounded-full border-2 mt-1"
                         style={{
                           background: `
-                            linear-gradient(180deg, #4a5a2a 0%, #2a3a0a 100%)
+                            linear-gradient(180deg, #5a7a3a 0%, #3a5a1a 100%)
                           `,
-                          borderColor: 'rgba(255,214,10,0.5)',
+                          borderColor: 'rgba(255,214,10,0.6)',
                           boxShadow: `
-                            0 5px 12px rgba(0,0,0,0.6),
-                            inset 0 2px 5px rgba(0,0,0,0.7),
-                            inset 0 -2px 3px rgba(255,255,255,0.1)
+                            0 6px 16px rgba(0,0,0,0.7),
+                            inset 0 3px 6px rgba(0,0,0,0.8),
+                            inset 0 -3px 4px rgba(255,255,255,0.12)
                           `,
                         }}
                       />
@@ -648,7 +609,6 @@ export function FriendshipSlotMachine() {
                 {jackpotTriggered && (
                   <motion.div
                     className="fixed inset-0 z-50 flex flex-col items-center justify-center px-4 cursor-auto"
-                    style={{ cursor: 'auto' }}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -664,7 +624,6 @@ export function FriendshipSlotMachine() {
                         fill="none"
                         animate={{ r: '200vw' }}
                         transition={{ duration: 1 }}
-                        style={{ opacity: 1 }}
                       />
                     </svg>
 
@@ -679,8 +638,7 @@ export function FriendshipSlotMachine() {
                         className="font-mono font-bold text-6xl"
                         style={{
                           color: '#ffd60a',
-                          textShadow:
-                            '0 0 20px #ffd60a, 0 0 60px rgba(255,214,10,0.6)',
+                          textShadow: '0 0 20px #ffd60a, 0 0 60px rgba(255,214,10,0.6)',
                         }}
                       >
                         ☢️ JACKPOT ☢️
@@ -700,8 +658,7 @@ export function FriendshipSlotMachine() {
                     <motion.div
                       className="bg-gradient-to-b from-[#0d1a06] to-[#1a0612] border-2 border-[#ffd60a] rounded-lg p-8 max-w-[380px] text-center relative z-10"
                       style={{
-                        boxShadow:
-                          '0 0 60px rgba(255,214,10,0.4), 0 0 120px rgba(255,214,10,0.15)',
+                        boxShadow: '0 0 60px rgba(255,214,10,0.4), 0 0 120px rgba(255,214,10,0.15)',
                       }}
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}

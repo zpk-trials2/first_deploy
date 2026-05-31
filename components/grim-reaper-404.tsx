@@ -173,7 +173,7 @@ export function GrimReaper404({ onRetry }: GrimReaper404Props) {
     const timer = setTimeout(() => {
       clearInterval(glitchInterval)
       setPhase('reaper')
-    }, 2500)
+    }, 1500)
 
     return () => { clearInterval(glitchInterval); clearTimeout(timer) }
   }, [])
