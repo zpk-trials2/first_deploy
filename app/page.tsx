@@ -22,9 +22,11 @@ import { FriendshipCoupons } from '@/components/friendship-coupons'
 import { ApologyBoard } from '@/components/apology-board'
 import { FriendshipSlotMachine } from '@/components/friendship-slot-machine'
 import { GrimReaper404 } from '@/components/grim-reaper-404'
+import { CatTimeGate } from '@/components/cat-time-gate'
 
 export default function BirthdayPage() {
   const [isUnlocked, setIsUnlocked] = useState(false)
+  const [catGatePassed, setCatGatePassed] = useState(false)
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
   const [isHacked, setIsHacked] = useState(false)
 
@@ -48,7 +50,13 @@ export default function BirthdayPage() {
       </AnimatePresence>
 
       <AnimatePresence mode="wait">
-        {isUnlocked && !cakeBlewOut && (
+        {isUnlocked && !catGatePassed && (
+          <CatTimeGate onPass={() => setCatGatePassed(true)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        {isUnlocked && catGatePassed && !cakeBlewOut && (
           <BirthdayCake onCakeBlewOut={() => setCakeBlewOut(true)} />
         )}
       </AnimatePresence>
