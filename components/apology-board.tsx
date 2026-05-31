@@ -167,7 +167,6 @@ export function ApologyBoard() {
                       exit={{ opacity: 0, scale: 0.5 }}
                       transition={{ delay: index * 0.05 }}
                       className="relative cursor-pointer group"
-                      onClick={() => handleAccept(apology.id)}
                       style={{
                         transform: `rotate(${apology.rotation}deg)`,
                       }}

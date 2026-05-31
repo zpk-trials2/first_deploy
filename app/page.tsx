@@ -20,10 +20,13 @@ import { FloatingBubbles } from '@/components/floating-bubbles'
 import { GlobalCursor } from '@/components/global-cursor'
 import { FriendshipCoupons } from '@/components/friendship-coupons'
 import { ApologyBoard } from '@/components/apology-board'
+import { FriendshipSlotMachine } from '@/components/friendship-slot-machine'
+import { GrimReaper404 } from '@/components/grim-reaper-404'
 
 export default function BirthdayPage() {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
+  const [isHacked, setIsHacked] = useState(false)
 
   return (
     <main className="relative">
@@ -31,8 +34,16 @@ export default function BirthdayPage() {
       <FloatingBubbles />
       
       <AnimatePresence mode="wait">
-        {!isUnlocked && (
-          <EntryGate onUnlock={() => setIsUnlocked(true)} />
+        {!isUnlocked && !isHacked && (
+          <EntryGate onUnlock={() => setIsUnlocked(true)} onHacked={() => setIsHacked(true)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isHacked && (
+          <GrimReaper404 onRetry={() => {
+            setIsHacked(false)
+          }} />
         )}
       </AnimatePresence>
 
@@ -64,6 +75,7 @@ export default function BirthdayPage() {
           {/* Fixed position UI elements */}
           <FriendshipCoupons />
           <ApologyBoard />
+          <FriendshipSlotMachine />
         </motion.div>
       )}
     </main>

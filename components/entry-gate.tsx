@@ -12,7 +12,7 @@ const CLUES = [
 
 const CORRECT_KEY = 'Dks'
 
-export function EntryGate({ onUnlock }: { onUnlock: () => void }) {
+export function EntryGate({ onUnlock, onHacked }: { onUnlock: () => void; onHacked: () => void }) {
   const [terminalLines, setTerminalLines] = useState<string[]>([])
   const [currentClueIndex, setCurrentClueIndex] = useState(0)
   const [pastClues, setPastClues] = useState<string[]>([])
@@ -180,7 +180,7 @@ export function EntryGate({ onUnlock }: { onUnlock: () => void }) {
       setShowScanlines(true)
       playChime()
       await new Promise(resolve => setTimeout(resolve, 800))
-      onUnlock()
+      onHacked()
     } else {
       // Animate current clue out
       setIsClueAnimating(true)
