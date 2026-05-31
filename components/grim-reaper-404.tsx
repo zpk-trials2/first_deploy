@@ -3,81 +3,114 @@
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, ContactShadows } from '@react-three/drei'
+import { useGLTF, ContactShadows, Loader } from '@react-three/drei'
 import * as THREE from 'three'
 
 const GLB_URL = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/grim_reaper_with_golden_angel_dark_wings-UIapNESP2iFXd6QFlTCQZw52ZvZQuD.glb'
 
 const dragState = { isDragging: false, startX: 0, startY: 0, velocityX: 0, velocityY: 0, autoRotate: true }
 
+// ─── Fallback Skull Animation ─────────────────────────────────────────────────
+function SkullFallback() {
+  return (
+    <div className="w-full h-full flex items-center justify-center relative">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+        className="text-8xl"
+      >
+        💀
+      </motion.div>
+      <motion.div
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="absolute text-sm font-mono"
+        style={{ color: 'rgba(255,0,0,0.4)', top: '70%' }}
+      >
+        LOADING THE REAPER...
+      </motion.div>
+    </div>
+  )
+}
+
 // ─── 3D Model ─────────────────────────────────────────────────────────────────
 
 function GrimReaperModel() {
   const groupRef = useRef<THREE.Group>(null)
-  const { scene } = useGLTF(GLB_URL)
-  const ready = useRef(false)
+  const [modelReady, setModelReady] = useState(false)
+  
+  try {
+    const { scene } = useGLTF(GLB_URL)
+    const ready = useRef(false)
 
-  // Clone once so we never mutate the cached scene
-  const cloned = useRef<THREE.Object3D | null>(null)
-  if (!cloned.current) {
-    cloned.current = scene.clone(true)
-  }
+    // Clone once so we never mutate the cached scene
+    const cloned = useRef<THREE.Object3D | null>(null)
+    if (!cloned.current) {
+      cloned.current = scene.clone(true)
+    }
 
-  useEffect(() => {
-    if (!cloned.current || ready.current) return
-    ready.current = true
+    useEffect(() => {
+      if (!cloned.current || ready.current) return
+      ready.current = true
+      
+      // Signal that model is ready
+      setTimeout(() => setModelReady(true), 100)
 
-    // Compute bounds on the cloned object, then scale + center it
-    const box = new THREE.Box3().setFromObject(cloned.current)
-    const center = box.getCenter(new THREE.Vector3())
-    const size = box.getSize(new THREE.Vector3())
-    const maxDim = Math.max(size.x, size.y, size.z)
-    const scale = 6.0 / maxDim
+      // Compute bounds on the cloned object, then scale + center it
+      const box = new THREE.Box3().setFromObject(cloned.current)
+      const center = box.getCenter(new THREE.Vector3())
+      const size = box.getSize(new THREE.Vector3())
+      const maxDim = Math.max(size.x, size.y, size.z)
+      const scale = 6.0 / maxDim
 
-    cloned.current.scale.setScalar(scale)
-    // After scaling, recompute center to shift it to origin
-    const box2 = new THREE.Box3().setFromObject(cloned.current)
-    const center2 = box2.getCenter(new THREE.Vector3())
-    cloned.current.position.set(-center2.x +1.0, -center2.y -1.5, -center2.z)
+      cloned.current.scale.setScalar(scale)
+      // After scaling, recompute center to shift it to origin
+      const box2 = new THREE.Box3().setFromObject(cloned.current)
+      const center2 = box2.getCenter(new THREE.Vector3())
+      cloned.current.position.set(-center2.x +1.0, -center2.y -1.5, -center2.z)
 
-    // Crimson tint
-    cloned.current.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
-        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
-        mats.forEach((m) => {
-          if (m instanceof THREE.MeshStandardMaterial) {
-            const mc = m.clone()
-            mc.color.multiplyScalar(0.25)
-            mc.color.lerp(new THREE.Color('#220000'), 0.5)
-            mc.emissive = new THREE.Color('#1a0000')
-            mc.emissiveIntensity = 0.2
-            mc.roughness = 0.85
-            mc.metalness = 0.15
-            mesh.material = mc
-          }
-        })
+      // Crimson tint
+      cloned.current.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material]
+          mats.forEach((m) => {
+            if (m instanceof THREE.MeshStandardMaterial) {
+              const mc = m.clone()
+              mc.color.multiplyScalar(0.25)
+              mc.color.lerp(new THREE.Color('#220000'), 0.5)
+              mc.emissive = new THREE.Color('#1a0000')
+              mc.emissiveIntensity = 0.2
+              mc.roughness = 0.85
+              mc.metalness = 0.15
+              mesh.material = mc
+            }
+          })
+        }
+      })
+    }, [])
+
+    useFrame(() => {
+      if (!groupRef.current) return
+      if (dragState.isDragging) {
+        groupRef.current.rotation.y += dragState.velocityX
+        groupRef.current.rotation.x += dragState.velocityY
+        dragState.velocityX *= 0.92
+        dragState.velocityY *= 0.92
+      } else if (dragState.autoRotate) {
+        groupRef.current.rotation.y += 0.004
       }
     })
-  }, [])
 
-  useFrame(() => {
-    if (!groupRef.current) return
-    if (dragState.isDragging) {
-      groupRef.current.rotation.y += dragState.velocityX
-      groupRef.current.rotation.x += dragState.velocityY
-      dragState.velocityX *= 0.92
-      dragState.velocityY *= 0.92
-    } else if (dragState.autoRotate) {
-      groupRef.current.rotation.y += 0.004
-    }
-  })
-
-  return (
-    <group ref={groupRef}>
-      <primitive object={cloned.current!} />
-    </group>
-  )
+    return (
+      <group ref={groupRef}>
+        <primitive object={cloned.current!} />
+      </group>
+    )
+  } catch (error) {
+    console.warn("[v0] 3D Model failed to load, using fallback")
+    return null
+  }
 }
 
 function Scene() {
@@ -236,7 +269,7 @@ export function GrimReaper404({ onRetry }: GrimReaper404Props) {
 
             <div className="relative z-10 w-full h-full flex flex-col md:w-full md:flex-row items-center justify-center gap-8 md:gap-12 px-6 py-8">
 
-              {/* ── LEFT: 3D Canvas ── */}
+              {/* ── LEFT: 3D Canvas with Fallback ── */}
               <motion.div
                className="absolute inset-0"
                initial={{ opacity: 0, scale: 0.8 }}
@@ -251,9 +284,12 @@ export function GrimReaper404({ onRetry }: GrimReaper404Props) {
                     camera={{ position: [0, 0, 5.5], fov: 50 }}
                     style={{ width: '100%', height: '100%', background: 'transparent' }}
                     dpr={[1, 1.5]}
-                    gl={{ antialias: true, alpha: true }}
+                    gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
+                    fallback={<SkullFallback />}
                   >
-                  <Scene />
+                  <Suspense fallback={null}>
+                    <Scene />
+                  </Suspense>
                 </Canvas>
 
                 <p className="absolute bottom-3 left-0 right-0 text-center font-mono text-xs"
