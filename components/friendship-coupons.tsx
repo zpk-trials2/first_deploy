@@ -43,7 +43,45 @@ const COUPONS: Coupon[] = [
     icon: <VolumeX className="w-6 h-6" />,
     color: '#ffd700',
   },
+  {
+    id: 'no-judgement-pass',
+    title: 'The No-Judgement Pass',
+    description: 'Tell me literally anything without fear. No judgment, no lectures, no side-eyes.',
+    icon: <MessageCircle className="w-6 h-6" />,
+    color: '#ff6b9d',
+  },
+  {
+    id: 'favor-card',
+    title: 'Unlimited Favor Card',
+    description: 'Cash this in for me doing literally one thing you want. Anything. (Within legal limits, probably).',
+    icon: <Gamepad2 className="w-6 h-6" />,
+    color: '#00ff88',
+  },
+  {
+    id: 'midnight-call-pass',
+    title: 'The Midnight Call Pass',
+    description: 'You can call me at 3am and I\'ll answer. Always. No questions about why.',
+    icon: <MessageCircle className="w-6 h-6" />,
+    color: '#ffa500',
+  },
+  {
+    id: 'honest-opinion-pass',
+    title: 'Brutally Honest Opinion Pass',
+    description: 'Ask me anything and get the 100% real, unfiltered, no-sugar-coating truth.',
+    icon: <VolumeX className="w-6 h-6" />,
+    color: '#ff375f',
+  },
 ]
+
+const FIXED_VALIDATION_CODES: { [key: string]: string } = {
+  'venting-pass': 'FC-VP-2024',
+  'game-token': 'FC-GT-2024',
+  'bad-joke-exemption': 'FC-BJE-2024',
+  'no-judgement-pass': 'FC-NJP-2024',
+  'favor-card': 'FC-UFC-2024',
+  'midnight-call-pass': 'FC-MCP-2024',
+  'honest-opinion-pass': 'FC-HOP-2024',
+}
 
 export function FriendshipCoupons() {
   const [isOpen, setIsOpen] = useState(false)
@@ -80,7 +118,7 @@ export function FriendshipCoupons() {
     }, 500)
   }, [])
 
-  const validationCode = `FC-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+  const validationCode = FIXED_VALIDATION_CODES[selectedCoupon?.id || ''] || 'FC-INVALID'
   const timestamp = new Date().toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -108,7 +146,7 @@ export function FriendshipCoupons() {
           >
             <ShoppingCart className="w-6 h-6 text-white" />
             <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#ff6b9d] text-white text-xs flex items-center justify-center font-bold">
-              3
+              7
             </span>
           </motion.button>
         </DrawerTrigger>

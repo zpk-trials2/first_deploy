@@ -18,12 +18,50 @@ const stars = [
   { x: 72, y: 78, name: "Us", desc: "The most important star of all.", color: "#ffd60a" },
 ]
 
-// Connect stars to form constellation pattern
-const connections = [
+const baseConnections = [
   [0, 7], [7, 8], [8, 1], [1, 2], [2, 3],
   [3, 9], [9, 4], [4, 5], [5, 6], [6, 7],
   [5, 10], [4, 11], [8, 9]
 ]
+
+// Generate unique constellation patterns
+function generateUniquePattern(previousPatterns: number[][][]): number[][] {
+  const newPattern: number[][] = []
+  const maxConnections = 8
+  
+  let attempts = 0
+  let isUnique = false
+  
+  while (!isUnique && attempts < 50) {
+    newPattern.length = 0
+    const numConnections = 3 + Math.floor(Math.random() * (maxConnections - 2))
+    
+    for (let i = 0; i < numConnections; i++) {
+      const from = Math.floor(Math.random() * stars.length)
+      const to = Math.floor(Math.random() * stars.length)
+      
+      if (from !== to) {
+        const connection = from < to ? [from, to] : [to, from]
+        // Avoid duplicate connections in same pattern
+        if (!newPattern.some(c => c[0] === connection[0] && c[1] === connection[1])) {
+          newPattern.push(connection)
+        }
+      }
+    }
+    
+    // Check if pattern is unique compared to recent patterns
+    isUnique = !previousPatterns.some(prevPattern => {
+      if (prevPattern.length !== newPattern.length) return false
+      return prevPattern.every(conn => 
+        newPattern.some(nc => nc[0] === conn[0] && nc[1] === conn[1])
+      )
+    })
+    
+    attempts++
+  }
+  
+  return newPattern
+}
 
 function Star({ 
   star, 
@@ -41,7 +79,6 @@ function Star({
   proximityScale: number
 }) {
   const isDimmed = hoveredIndex !== null && !isHovered
-  // Calculate the effective scale: base is 1, proximity adds up to 1.5x, hover adds more
   const baseScale = 1 + (proximityScale * 1.5)
   const finalScale = isHovered ? baseScale * 1.4 : baseScale
   const glowRadius = 10 + (proximityScale * 12) + (isHovered ? 6 : 0)
@@ -69,9 +106,9 @@ function Star({
           cursor: 'pointer',
           filter: `drop-shadow(0 0 ${8 + proximityScale * 12}px ${star.color})`,
           transform: `scale(${finalScale})`,
-          transformOrigin: `${star.x}% ${star.y}%`,
+          transformOrigin: 'center', /* FIX: Keeps scaling pinned perfectly to the center */
           transformBox: 'fill-box',
-          transition: 'transform 0.15s ease-out, filter 0.15s ease-out',
+          transition: 'filter 0.15s ease-out, opacity 0.15s ease-out', /* FIX: Removed transform from here to prevent continuous mouse-move jitter */
         }}
         onMouseEnter={() => onHover(index)}
         onMouseLeave={() => onHover(null)}
@@ -112,45 +149,82 @@ export function ConstellationMap() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [backgroundStars, setBackgroundStars] = useState<Array<{ x: number; y: number; opacity: number }>>([])
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
   const [proximityScales, setProximityScales] = useState<number[]>(stars.map(() => 0))
+  const [constellationPatterns, setConstellationPatterns] = useState<Array<{ pattern: number[][], newLineIndices: Set<number> }>>([])
+  const patternHistoryRef = useRef<number[][][]>([])
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768)
-    // Generate random background stars
     const bgStars = Array.from({ length: 80 }, () => ({
       x: Math.random() * 100,
       y: Math.random() * 100,
       opacity: 0.1 + Math.random() * 0.3,
     }))
     setBackgroundStars(bgStars)
+
+    // Initialize with 7 unique constellation patterns
+    const initialPatterns = []
+    for (let i = 0; i < 7; i++) {
+      const pattern = generateUniquePattern(patternHistoryRef.current)
+      initialPatterns.push({ pattern, newLineIndices: new Set(Array.from({ length: pattern.length }, (_, i) => i)) })
+      patternHistoryRef.current.push(pattern)
+    }
+    setConstellationPatterns(initialPatterns)
+
+    // Update constellation patterns every 2 seconds
+    const patternInterval = setInterval(() => {
+      setConstellationPatterns(prev => {
+        // Remove oldest pattern
+        const updated = prev.slice(1)
+        
+        // Generate new unique pattern
+        const newPattern = generateUniquePattern(patternHistoryRef.current)
+        patternHistoryRef.current.push(newPattern)
+        
+        // Keep only last 20 patterns in history to avoid memory bloat
+        if (patternHistoryRef.current.length > 20) {
+          patternHistoryRef.current.shift()
+        }
+        
+        // Mark all lines as new for this pattern
+        updated.push({ pattern: newPattern, newLineIndices: new Set(Array.from({ length: newPattern.length }, (_, i) => i)) })
+        
+        return updated
+      })
+    }, 2000)
+
+    return () => {
+      clearInterval(patternInterval)
+    }
   }, [])
 
-  // Calculate proximity scales based on mouse position
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (isMobile || !mapRef.current) return
     
     const rect = mapRef.current.getBoundingClientRect()
-    const mouseX = ((e.clientX - rect.left) / rect.width) * 100
-    const mouseY = ((e.clientY - rect.top) / rect.height) * 100
+    // FIX: Track mouse position in true absolute pixel space
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
     
-    setMousePos({ x: mouseX, y: mouseY })
+    // FIX: Set a uniform pixel-based radius (e.g., 120px) for a perfectly round proximity zone
+    const maxDistanceInPixels = 120 
     
-    // Calculate proximity for each star (0 to 1, where 1 is closest)
-    const maxDistance = 20 // percentage units for max effect range
     const newScales = stars.map(star => {
-      const dx = star.x - mouseX
-      const dy = star.y - mouseY
+      // Convert the star's percentage coordinates back into actual container pixels
+      const starX = (star.x / 100) * rect.width
+      const starY = (star.y / 100) * rect.height
+      
+      const dx = starX - mouseX
+      const dy = starY - mouseY
       const distance = Math.sqrt(dx * dx + dy * dy)
-      // Convert distance to scale (0 when far, 1 when at star)
-      return Math.max(0, 1 - (distance / maxDistance))
+      
+      return Math.max(0, 1 - (distance / maxDistanceInPixels))
     })
     
     setProximityScales(newScales)
   }, [isMobile])
 
   const handleMouseLeave = useCallback(() => {
-    setMousePos(null)
     setProximityScales(stars.map(() => 0))
   }, [])
 
@@ -158,12 +232,9 @@ export function ConstellationMap() {
     <section 
       ref={sectionRef}
       className="relative py-16 sm:py-20 px-4 overflow-hidden"
-      style={{
-        background: '#04060f',
-      }}
+      style={{ background: '#04060f' }}
     >
       <div className="max-w-5xl mx-auto">
-        {/* Section Title */}
         <motion.h2
           className="font-mono text-base sm:text-lg md:text-xl mb-8 flex items-center justify-center gap-2"
           style={{ 
@@ -183,7 +254,6 @@ export function ConstellationMap() {
           </motion.span>
         </motion.h2>
 
-        {/* Interaction Hint */}
         <motion.p
           className="text-center mb-4 font-mono text-xs"
           style={{ color: '#64748b' }}
@@ -194,7 +264,6 @@ export function ConstellationMap() {
           {isMobile ? '[ tap on a star to reveal ]' : '[ hover over a star to reveal ]'}
         </motion.p>
 
-        {/* Star Map Container */}
         <motion.div
           ref={mapRef}
           className="relative w-full rounded-2xl overflow-hidden"
@@ -209,7 +278,6 @@ export function ConstellationMap() {
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
         >
-          {/* Background stars */}
           <svg className="absolute inset-0 w-full h-full">
             {backgroundStars.map((star, i) => (
               <circle
@@ -222,23 +290,33 @@ export function ConstellationMap() {
               />
             ))}
 
-            {/* Constellation lines */}
-            {connections.map(([from, to], i) => (
-              <motion.line
-                key={i}
-                x1={`${stars[from].x}%`}
-                y1={`${stars[from].y}%`}
-                x2={`${stars[to].x}%`}
-                y2={`${stars[to].y}%`}
-                stroke="rgba(255, 255, 255, 0.2)"
-                strokeWidth={1}
-                initial={{ pathLength: 0, opacity: 0 }}
-                animate={isInView ? { pathLength: 1, opacity: 0.2 } : {}}
-                transition={{ duration: 1, delay: i * 0.1 }}
-              />
-            ))}
+            {constellationPatterns.map((constellationData, patternIdx) => 
+              constellationData.pattern.map(([from, to], lineIdx) => {
+                const isNewLine = constellationData.newLineIndices.has(lineIdx)
+                return (
+                  <motion.line
+                    key={`constellation-${patternIdx}-${lineIdx}`}
+                    x1={`${stars[from].x}%`}
+                    y1={`${stars[from].y}%`}
+                    x2={`${stars[to].x}%`}
+                    y2={`${stars[to].y}%`}
+                    stroke={isNewLine ? "rgba(255, 212, 10, 0.6)" : "rgba(255, 255, 255, 0.15)"}
+                    strokeWidth={isNewLine ? 1.5 : 1}
+                    initial={{ pathLength: 0, opacity: isNewLine ? 0 : 0.15 }}
+                    animate={{ 
+                      pathLength: 1, 
+                      opacity: isNewLine ? [0.6, 0.3, 0.2] : 0.15,
+                      strokeWidth: isNewLine ? [1.5, 1, 1] : 1,
+                    }}
+                    transition={{ 
+                      duration: isNewLine ? 2 : 0.8,
+                      delay: isNewLine ? 0 : patternIdx * 0.05,
+                    }}
+                  />
+                )
+              })
+            )}
 
-            {/* Stars */}
             {stars.map((star, index) => (
               <Star
                 key={star.name}
@@ -252,7 +330,6 @@ export function ConstellationMap() {
             ))}
           </svg>
 
-          {/* Tooltips */}
           <AnimatePresence>
             {hoveredIndex !== null && (
               <Tooltip star={stars[hoveredIndex]} isMobile={isMobile} />
@@ -260,7 +337,6 @@ export function ConstellationMap() {
           </AnimatePresence>
         </motion.div>
 
-        {/* Footer */}
         <motion.p
           className="text-center mt-8 italic"
           style={{ 

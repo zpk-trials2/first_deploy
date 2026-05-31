@@ -12,7 +12,7 @@ const CLUES = [
 
 const CORRECT_KEY = 'Dks'
 
-export function EntryGate({ onUnlock }: { onUnlock: () => void }) {
+export function EntryGate({ onUnlock, onHacked }: { onUnlock: () => void; onHacked: () => void }) {
   const [terminalLines, setTerminalLines] = useState<string[]>([])
   const [currentClueIndex, setCurrentClueIndex] = useState(0)
   const [pastClues, setPastClues] = useState<string[]>([])
@@ -98,16 +98,23 @@ export function EntryGate({ onUnlock }: { onUnlock: () => void }) {
       oscillator.connect(gainNode)
       gainNode.connect(audioContext.destination)
       
-      oscillator.type = 'triangle'
-      oscillator.frequency.setValueAtTime(440, audioContext.currentTime)
-      oscillator.frequency.setValueAtTime(554.37, audioContext.currentTime + 0.1)
-      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.2)
+      // Melodious ascending arpeggio with smooth envelope
+      oscillator.type = 'sine'
       
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+      // Start low, go up in a pleasant arpeggio pattern
+      oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime) // C4
+      oscillator.frequency.setValueAtTime(329.63, audioContext.currentTime + 0.15) // E4
+      oscillator.frequency.setValueAtTime(392.00, audioContext.currentTime + 0.30) // G4
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime + 0.45) // C5 (holds longer)
+      
+      // Smooth fade out
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime)
+      gainNode.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + 0.05)
+      gainNode.gain.linearRampToValueAtTime(0.35, audioContext.currentTime + 0.3)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2)
       
       oscillator.start(audioContext.currentTime)
-      oscillator.stop(audioContext.currentTime + 0.5)
+      oscillator.stop(audioContext.currentTime + 1.2)
     } catch {
       // Audio not available
     }
@@ -180,7 +187,7 @@ export function EntryGate({ onUnlock }: { onUnlock: () => void }) {
       setShowScanlines(true)
       playChime()
       await new Promise(resolve => setTimeout(resolve, 800))
-      onUnlock()
+      onHacked()
     } else {
       // Animate current clue out
       setIsClueAnimating(true)

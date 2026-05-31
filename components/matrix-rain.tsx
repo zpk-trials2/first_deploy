@@ -76,7 +76,7 @@ export function MatrixRain() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 w-full h-full"
-      style={{ background: 'black' }}
+      style={{ background: 'black', textAlign: 'center', fontSize: '50px' }}
     />
   )
 }

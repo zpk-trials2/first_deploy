@@ -167,10 +167,10 @@ export function ApologyBoard() {
                       exit={{ opacity: 0, scale: 0.5 }}
                       transition={{ delay: index * 0.05 }}
                       className="relative cursor-pointer group"
-                      onClick={() => handleAccept(apology.id)}
                       style={{
                         transform: `rotate(${apology.rotation}deg)`,
                       }}
+                      onClick={() => handleAccept(apology.id)}
                     >
                       {/* Sticky note */}
                       <div
@@ -201,37 +201,41 @@ export function ApologyBoard() {
                           {apology.text}
                         </p>
 
-                        {/* Checkbox */}
-                        <motion.div
-                          className="absolute bottom-2 right-2 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center"
-                          style={{
-                            borderColor: isAccepted ? '#00ff88' : 'rgba(26, 26, 46, 0.3)',
-                            backgroundColor: isAccepted ? '#00ff88' : 'transparent',
-                          }}
-                          animate={isAccepted ? { scale: [1, 1.3, 1] } : {}}
-                          transition={{ duration: 0.3 }}
-                        >
-                          {isAccepted && (
-                            <motion.svg
-                              viewBox="0 0 24 24"
-                              className="w-3 h-3 sm:w-4 sm:h-4"
+                      {/* Checkbox */}
+                      <motion.div
+                        className="absolute bottom-2 right-2 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center cursor-pointer"
+                        style={{
+                          borderColor: isAccepted ? '#00ff88' : 'rgba(26, 26, 46, 0.3)',
+                          backgroundColor: isAccepted ? '#00ff88' : 'transparent',
+                        }}
+                        animate={isAccepted ? { scale: [1, 1.3, 1] } : {}}
+                        transition={{ duration: 0.3 }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleAccept(apology.id)
+                        }}
+                      >
+                        {isAccepted && (
+                          <motion.svg
+                            viewBox="0 0 24 24"
+                            className="w-3 h-3 sm:w-4 sm:h-4"
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <motion.path
+                              d="M5 12l5 5L20 7"
+                              fill="none"
+                              stroke="#1a1a2e"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
                               initial={{ pathLength: 0 }}
                               animate={{ pathLength: 1 }}
-                              transition={{ duration: 0.3 }}
-                            >
-                              <motion.path
-                                d="M5 12l5 5L20 7"
-                                fill="none"
-                                stroke="#1a1a2e"
-                                strokeWidth="3"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: 1 }}
-                              />
-                            </motion.svg>
-                          )}
-                        </motion.div>
+                            />
+                          </motion.svg>
+                        )}
+                      </motion.div>
 
                         {/* Hover hint */}
                         {!isAccepted && (

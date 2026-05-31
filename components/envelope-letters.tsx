@@ -17,6 +17,7 @@ declare global {
 
 const letters = [
   {
+    initial: "D", // First Envelope
     title: "A Note on Who You Are",
     color: "#00d4ff",
     content: `You are remarkable in ways you probably don't even realize. Your laugh — the real one — is absolutely contagious. The way you overthink everything but somehow still make bold choices? That's peak you. You're the kind of person who remembers the small things, who shows up when it matters, who makes people feel seen without even trying.
@@ -26,6 +27,7 @@ Your energy is rare. In a world of small talk and surface-level connections, you
 Never let anyone dull that spark.`,
   },
   {
+    initial: "k", // Second Envelope
     title: "What Our Friendship Means",
     color: "#bf5af2",
     content: `Finding you was like finding a missing puzzle piece I didn't know I was looking for. Our conversations flow like we've known each other for lifetimes. The way we can go from deep existential talks to absolute chaos in seconds — that's rare. That's us.
@@ -35,6 +37,7 @@ You've been there through the highs and the lows, the 3am rants and the random m
 This friendship isn't just important — it's essential. You're my person, and I don't take that lightly.`,
   },
   {
+    initial: "s", // Third Envelpoe
     title: "Everything I Wish For You",
     color: "#ff375f",
     content: `On this birthday, I wish you moments that take your breath away. Adventures that scare you just enough to feel alive. Connections that fill your soul. Rest when you need it and chaos when you crave it.
@@ -47,24 +50,24 @@ You deserve the world and then some. Happy birthday, Diksha. Here's to another y
 
 function CatPaw({ side }: { side: 'left' | 'right' }) {
   const isRight = side === 'right'
-  
+
   return (
-    <svg 
-      width="60" 
-      height="50" 
+    <svg
+      width="60"
+      height="50"
       viewBox="0 0 60 50"
       style={{
         transform: isRight ? 'rotate(15deg) scaleX(-1)' : 'rotate(-15deg)',
       }}
     >
       {/* Main pad */}
-      <ellipse 
-        cx="30" 
-        cy="32" 
-        rx="14" 
-        ry="12" 
-        fill="#f9a8d4" 
-        stroke="#e879a0" 
+      <ellipse
+        cx="30"
+        cy="32"
+        rx="14"
+        ry="12"
+        fill="#f9a8d4"
+        stroke="#e879a0"
         strokeWidth="1.5"
       />
       {/* Toes */}
@@ -76,12 +79,12 @@ function CatPaw({ side }: { side: 'left' | 'right' }) {
   )
 }
 
-function EnvelopeCard({ 
-  letter, 
-  index 
-}: { 
+function EnvelopeCard({
+  letter,
+  index
+}: {
   letter: typeof letters[0]
-  index: number 
+  index: number
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-30px' })
@@ -104,11 +107,11 @@ function EnvelopeCard({
     // Step 1: Show cat paws
     setShowPaws(true)
     await new Promise(resolve => setTimeout(resolve, 600))
-    
+
     // Step 2: Open envelope flap
     setFlapOpen(true)
     await new Promise(resolve => setTimeout(resolve, 600))
-    
+
     // Hide paws and show letter
     setShowPaws(false)
     setIsOpen(true)
@@ -172,7 +175,7 @@ function EnvelopeCard({
         onMouseLeave={() => setIsHovered(false)}
         animate={{
           y: isHovered && !isOpen ? -6 : 0,
-          boxShadow: isHovered && !isOpen 
+          boxShadow: isHovered && !isOpen
             ? `0 0 30px ${letter.color}30`
             : '0 0 0px transparent',
         }}
@@ -183,7 +186,7 @@ function EnvelopeCard({
           <svg className="w-full h-full" viewBox="0 0 320 128" preserveAspectRatio="none">
             {/* Envelope body */}
             <rect x="0" y="0" width="320" height="128" fill={`${letter.color}10`} />
-            
+
             {/* Flap */}
             <motion.polygon
               points="0,0 160,64 320,0"
@@ -191,40 +194,40 @@ function EnvelopeCard({
               stroke={letter.color}
               strokeWidth="1"
               style={{ transformOrigin: '160px 0px' }}
-              animate={{ 
+              animate={{
                 rotateX: flapOpen ? -160 : 0,
               }}
               transition={{ type: 'spring', stiffness: 100, damping: 15 }}
             />
           </svg>
-          
+
           {/* Wax seal */}
-          <div 
+          <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full flex items-center justify-center"
             style={{
               background: letter.color,
               boxShadow: `0 0 20px ${letter.color}50`,
             }}
           >
-            <span className="text-white font-serif text-xl">D</span>
+            <span className="text-white font-serif text-xl">{letter.initial}</span>
           </div>
         </div>
 
         {/* Title */}
         <div className="p-4 text-center">
-          <h3 
+          <h3
             className="text-lg sm:text-xl font-serif italic"
             style={{ color: letter.color }}
           >
             {letter.title}
           </h3>
-          
+
           {/* Click to reveal badge - only on hover */}
           <AnimatePresence>
             {isHovered && !isOpen && (
               <motion.span
                 className="inline-block mt-2 px-3 py-1 rounded-full text-xs"
-                style={{ 
+                style={{
                   background: `${letter.color}20`,
                   color: letter.color,
                 }}
@@ -248,31 +251,31 @@ function EnvelopeCard({
               exit={{ opacity: 0, y: 40 }}
               transition={{ duration: 0.4 }}
             >
-              <div 
+              <div
                 className="p-4 rounded-lg"
                 style={{ background: 'rgba(0, 0, 0, 0.3)' }}
               >
-                <p 
+                <p
                   className="text-sm sm:text-base leading-relaxed whitespace-pre-line"
-                  style={{ 
+                  style={{
                     color: '#fef3c7',
                     fontFamily: 'var(--font-cormorant), serif',
                   }}
                 >
                   {letter.content}
                 </p>
-                
-                <p 
+
+                <p
                   className="text-right mt-4 italic text-sm"
                   style={{ color: '#94a3b8' }}
                 >
                   — [Your Name]
                 </p>
               </div>
-              
+
               <button
                 className="w-full mt-4 py-2 text-sm rounded-lg transition-colors"
-                style={{ 
+                style={{
                   background: `${letter.color}20`,
                   color: letter.color,
                 }}
@@ -340,16 +343,16 @@ export function EnvelopeLetters() {
           <Heart
             className="w-10 h-10 sm:w-12 sm:h-12 animate-heart-pulse"
             fill="#ff375f"
-            style={{ 
+            style={{
               color: '#ff375f',
-              filter: 'drop-shadow(0 0 20px rgba(255, 55, 95, 0.5))' 
+              filter: 'drop-shadow(0 0 20px rgba(255, 55, 95, 0.5))'
             }}
           />
         </motion.div>
 
         <motion.h2
           className="text-2xl sm:text-3xl md:text-4xl text-center mb-10 sm:mb-12 md:mb-16 text-balance"
-          style={{ 
+          style={{
             color: '#ffffff',
             fontFamily: 'var(--font-cormorant), serif',
             fontStyle: 'italic',
