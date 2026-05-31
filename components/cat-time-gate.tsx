@@ -1,280 +1,238 @@
-"use client"
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-
-interface CatTimeGateProps {
-  onPass: () => void
-}
 
 const SECRET_WORD = 'soldier'
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-const typewrite = async (
-  text: string,
-  speed: number,
-  setWhisperText: (text: string) => void
-) => {
-  setWhisperText('')
+const typewrite = async (text: string, speed: number, setter: (t: string) => void) => {
+  setter('')
   for (let i = 0; i <= text.length; i++) {
     await delay(speed)
-    setWhisperText(text.slice(0, i))
+    setter(text.slice(0, i))
   }
+  await delay(200)
 }
 
-function CatGoma({
-  phase,
-  isBlocking,
-}: {
-  phase: string
-  isBlocking: boolean
-}) {
-  const getRotation = () => {
-    switch (phase) {
-      case 'leaning':
-      case 'whisper':
-        return 12
-      case 'blocking':
-        return -5
-      default:
-        return 0
-    }
-  }
+const STARS = [
+  {x:5,y:8},{x:12,y:22},{x:88,y:15},{x:95,y:40},
+  {x:3,y:55},{x:78,y:72},{x:92,y:88},{x:20,y:90},
+  {x:45,y:5},{x:67,y:18},{x:15,y:35},{x:82,y:48},
+  {x:33,y:60},{x:55,y:78},{x:70,y:92},{x:8,y:80},
+  {x:40,y:25},{x:60,y:42},{x:25,y:70},{x:75,y:30},
+  {x:50,y:88},{x:18,y:12},{x:88,y:62},{x:35,y:45},
+  {x:65,y:8},{x:10,y:65},{x:90,y:25},{x:48,y:55},
+  {x:22,y:48},{x:72,y:78},{x:38,y:15},{x:58,y:68},
+  {x:15,y:82},{x:85,y:8},{x:28,y:32},{x:68,y:55},
+  {x:42,y:72},{x:78,y:38},{x:5,y:42},{x:95,y:68},
+  {x:32,y:88},{x:62,y:22},{x:18,y:58},{x:82,y:82},
+  {x:48,y:12},{x:72,y:45},{x:25,y:25},{x:55,y:95},
+  {x:38,y:62},{x:8,y:95}
+]
 
-  const getX = () => {
-    switch (phase) {
-      case 'leaning':
-      case 'whisper':
-        return 8
-      default:
-        return 0
-    }
-  }
-
+function CatGoma({ phase, isBlocking }: { phase: string; isBlocking: boolean }) {
   return (
     <motion.svg
-      key={`goma-${phase}`}
-      viewBox="0 0 120 160"
-      width={120}
-      height={160}
-      className="absolute bottom-0 left-5"
+      viewBox="0 0 140 180"
+      width={140}
+      height={180}
+      className="absolute bottom-0 left-0"
       animate={{
-        rotate: getRotation(),
-        x: getX(),
+        rotate: phase === 'leaning' || phase === 'whisper' ? 14 : phase === 'blocking' ? -6 : 0,
+        x: phase === 'leaning' || phase === 'whisper' ? 10 : 0,
       }}
-      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      transition={{ type: 'spring', stiffness: 160, damping: 22 }}
     >
-      <ellipse cx={60} cy={120} rx={38} ry={32} fill="#8a8a8a" />
-      <circle cx={60} cy={78} r={34} fill="#9a9a9a" />
-      <polygon points="22,52 32,28 42,52" fill="#9a9a9a" />
-      <motion.polygon
-        points="25,50 32,32 39,50"
-        fill="#c4868a"
-        opacity={0.7}
-        animate={
-          isBlocking
-            ? { translateY: 4, rotate: 10 }
-            : { translateY: 0, rotate: 0 }
-        }
-        transition={{ type: 'spring', stiffness: 200 }}
-      />
-      <polygon points="78,52 88,28 98,52" fill="#9a9a9a" />
-      <motion.polygon
-        points="81,50 88,32 95,50"
-        fill="#c4868a"
-        opacity={0.7}
-        animate={
-          isBlocking
-            ? { translateY: 4, rotate: -10 }
-            : { translateY: 0, rotate: 0 }
-        }
-        transition={{ type: 'spring', stiffness: 200 }}
-      />
-      <motion.ellipse
-        cx={48}
-        cy={76}
-        rx={6}
-        ry={7}
-        fill="#2a1a3a"
-        animate={phase === 'leaning' ? { ry: 5 } : { ry: 7 }}
-        transition={{ duration: 0.3 }}
-      />
-      <circle cx={50} cy={73} r={2} fill="white" />
-      <motion.ellipse
-        cx={72}
-        cy={76}
-        rx={6}
-        ry={7}
-        fill="#2a1a3a"
-        animate={phase === 'leaning' ? { ry: 5 } : { ry: 7 }}
-        transition={{ duration: 0.3 }}
-      />
-      <circle cx={74} cy={73} r={2} fill="white" />
-      <ellipse cx={60} cy={86} rx={4} ry={3} fill="#c4868a" />
-      <path
-        d="M 54 90 Q 60 95 66 90"
-        fill="none"
-        stroke="#c4868a"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line x1={20} y1={84} x2={50} y2={87} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={18} y1={89} x2={50} y2={90} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={70} y1={87} x2={100} y2={84} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={70} y1={90} x2={102} y2={89} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      {(phase === 'approved' || phase === 'reacting') && (
-        <>
-          <circle cx={40} cy={88} r={8} fill="#ffb7c5" opacity={0.35} />
-          <circle cx={80} cy={88} r={8} fill="#ffb7c5" opacity={0.35} />
-        </>
+      {/* Body */}
+      <ellipse cx="70" cy="128" rx="44" ry="36" fill="#7d7d7d" />
+      <ellipse cx="70" cy="130" rx="28" ry="24" fill="#919191" />
+      
+      {/* Head */}
+      <circle cx="70" cy="82" r="40" fill="#8c8c8c" />
+      
+      {/* Left Ear */}
+      <motion.g animate={isBlocking ? { translateY: 6, rotate: 18 } : { translateY: 0, rotate: 0 }} transition={{ spring: { stiffness: 180 } }}>
+        <ellipse cx="38" cy="50" rx="14" ry="18" transform="rotate(-15, 38, 50)" fill="#8c8c8c" />
+        <ellipse cx="38" cy="52" rx="8" ry="11" transform="rotate(-15, 38, 52)" fill="#e8a0a8" opacity="0.75" />
+      </motion.g>
+      
+      {/* Right Ear */}
+      <motion.g animate={isBlocking ? { translateY: 6, rotate: -18 } : { translateY: 0, rotate: 0 }} transition={{ spring: { stiffness: 180 } }}>
+        <ellipse cx="102" cy="50" rx="14" ry="18" transform="rotate(15, 102, 50)" fill="#8c8c8c" />
+        <ellipse cx="102" cy="52" rx="8" ry="11" transform="rotate(15, 102, 52)" fill="#e8a0a8" opacity="0.75" />
+      </motion.g>
+      
+      {/* Eyes */}
+      <circle cx="54" cy="80" r="9" fill="#2a1a3a" />
+      <circle cx="57" cy="76" r="3" fill="white" />
+      <motion.rect x="45" y="71" width="18" height="9" rx="4" fill="#8c8c8c" animate={{ scaleY: [1, 1, 1, 2.2, 1] }} times={[0, 0.88, 0.9, 0.94, 1]} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1.5, transformOrigin: 'center top' }} />
+      
+      <circle cx="86" cy="80" r="9" fill="#2a1a3a" />
+      <circle cx="89" cy="76" r="3" fill="white" />
+      <motion.rect x="77" y="71" width="18" height="9" rx="4" fill="#8c8c8c" animate={{ scaleY: [1, 1, 1, 2.2, 1] }} times={[0, 0.88, 0.9, 0.94, 1]} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1.5, transformOrigin: 'center top' }} />
+      
+      {/* Nose */}
+      <ellipse cx="70" cy="90" rx="4" ry="3" fill="#d4909a" />
+      
+      {/* Mouth */}
+      {!isBlocking ? (
+        <path d="M 63 95 Q 70 101 77 95" fill="none" stroke="#c4808a" strokeWidth="2" strokeLinecap="round" />
+      ) : (
+        <path d="M 63 96 Q 70 94 77 96" fill="none" stroke="#c4808a" strokeWidth="2" strokeLinecap="round" />
       )}
-      <motion.path
-        d="M 22 148 Q 0 170 10 190 Q 20 210 35 195"
-        fill="none"
-        stroke="#8a8a8a"
-        strokeWidth={8}
-        strokeLinecap="round"
-        animate={{ rotate: [-8, 8, -8] }}
-        transition={{ duration: 2, repeat: Infinity }}
-        style={{ transformOrigin: '35px 148px' }}
-      />
+      
+      {/* Whiskers */}
+      <line x1="10" y1="87" x2="58" y2="89" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      <line x1="8" y1="92" x2="58" y2="92" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      <line x1="12" y1="97" x2="58" y2="95" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      <line x1="82" y1="89" x2="130" y2="87" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      <line x1="82" y1="92" x2="132" y2="92" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      <line x1="82" y1="95" x2="128" y2="97" stroke="rgba(255,255,255,0.35)" strokeWidth="1" />
+      
+      {/* Paws */}
+      <ellipse cx="50" cy="158" rx="14" ry="9" fill="#7d7d7d" />
+      <line x1="44" y1="155" x2="44" y2="163" stroke="#6a6a6a" strokeWidth="1.2" />
+      <ellipse cx="90" cy="158" rx="14" ry="9" fill="#7d7d7d" />
+      <line x1="96" y1="155" x2="96" y2="163" stroke="#6a6a6a" strokeWidth="1.2" />
+      
+      {/* Tail */}
+      <motion.path d="M 26 150 Q -10 140 -5 115 Q 0 95 20 105 Q 35 112 30 125" fill="none" stroke="#7d7d7d" strokeWidth="12" strokeLinecap="round" animate={{ rotate: [-6, 8, -6] }} transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }} style={{ transformOrigin: '26px 150px' }} />
+      
+      {/* Blush */}
+      <AnimatePresence>
+        {(phase === 'approved' || phase === 'reacting') && (
+          <>
+            <motion.ellipse cx="42" cy="94" rx="10" ry="6" fill="#ffb7c5" opacity="0.4" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 0.4, scale: 1 }} exit={{ opacity: 0 }} />
+            <motion.ellipse cx="98" cy="94" rx="10" ry="6" fill="#ffb7c5" opacity="0.4" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 0.4, scale: 1 }} exit={{ opacity: 0 }} />
+          </>
+        )}
+      </AnimatePresence>
+      
+      {/* Bounce */}
+      {phase === 'approved' && <motion.g animate={{ y: [0, -16, 0, -8, 0, -4, 0] }} transition={{ duration: 1, ease: 'easeOut' }} />}
     </motion.svg>
   )
 }
 
-function CatPeach({
-  phase,
-  isBlocking,
-}: {
-  phase: string
-  isBlocking: boolean
-}) {
+function CatPeach({ phase, isBlocking }: { phase: string; isBlocking: boolean }) {
   return (
     <motion.svg
-      key={`peach-${phase}`}
-      viewBox="0 0 120 160"
-      width={120}
-      height={160}
-      className="absolute bottom-0 right-5"
+      viewBox="0 0 140 180"
+      width={140}
+      height={180}
+      className="absolute bottom-0 right-0"
       animate={{
-        rotate: phase === 'blocking' ? 5 : phase === 'leaning' ? -8 : 0,
-        x: phase === 'leaning' || phase === 'whisper' ? -6 : 0,
+        rotate: phase === 'blocking' ? 6 : phase === 'leaning' || phase === 'whisper' ? -10 : 0,
+        x: phase === 'leaning' || phase === 'whisper' ? -10 : 0,
       }}
-      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+      transition={{ type: 'spring', stiffness: 160, damping: 22 }}
     >
-      <ellipse cx={60} cy={120} rx={38} ry={32} fill="#f0ede8" />
-      <circle cx={60} cy={78} r={34} fill="#f5f2ee" />
-      <polygon points="22,52 32,28 42,52" fill="#f0ede8" />
-      <motion.polygon
-        points="25,50 32,32 39,50"
-        fill="#ffb7c5"
-        opacity={0.8}
-        animate={
-          isBlocking
-            ? { translateY: 4, rotate: 10 }
-            : { translateY: 0, rotate: 0 }
-        }
-        transition={{ type: 'spring', stiffness: 200 }}
-      />
-      <polygon points="78,52 88,28 98,52" fill="#f0ede8" />
-      <motion.polygon
-        points="81,50 88,32 95,50"
-        fill="#ffb7c5"
-        opacity={0.8}
-        animate={
-          isBlocking
-            ? { translateY: 4, rotate: -10 }
-            : { translateY: 0, rotate: 0 }
-        }
-        transition={{ type: 'spring', stiffness: 200 }}
-      />
-      <motion.ellipse
-        cx={48}
-        cy={76}
-        rx={6}
-        ry={isBlocking ? 4 : 7}
-        fill="#1a2a1a"
-        transition={{ duration: 0.3 }}
-      />
-      <circle cx={50} cy={73} r={2} fill="white" />
-      <motion.ellipse
-        cx={72}
-        cy={76}
-        rx={6}
-        ry={isBlocking ? 4 : 7}
-        fill="#1a2a1a"
-        transition={{ duration: 0.3 }}
-      />
-      <circle cx={74} cy={73} r={2} fill="white" />
-      {isBlocking && (
-        <>
-          <path
-            d="M 38 64 Q 48 60 52 66"
-            fill="none"
-            stroke="#333"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 68 66 Q 72 60 82 64"
-            fill="none"
-            stroke="#333"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-          />
-        </>
+      {/* Body */}
+      <ellipse cx="70" cy="128" rx="44" ry="36" fill="#ede8e0" />
+      <ellipse cx="70" cy="130" rx="28" ry="24" fill="#f5f2ec" />
+      
+      {/* Head */}
+      <circle cx="70" cy="82" r="40" fill="#f0ece4" />
+      
+      {/* Left Ear */}
+      <motion.g animate={isBlocking ? { translateY: 6, rotate: 18 } : { translateY: 0, rotate: 0 }} transition={{ spring: { stiffness: 180 } }}>
+        <ellipse cx="38" cy="50" rx="14" ry="18" transform="rotate(-15, 38, 50)" fill="#ede8e0" />
+        <ellipse cx="38" cy="52" rx="8" ry="11" transform="rotate(-15, 38, 52)" fill="#ffb7c5" opacity="0.85" />
+      </motion.g>
+      
+      {/* Right Ear */}
+      <motion.g animate={isBlocking ? { translateY: 6, rotate: -18 } : { translateY: 0, rotate: 0 }} transition={{ spring: { stiffness: 180 } }}>
+        <ellipse cx="102" cy="50" rx="14" ry="18" transform="rotate(15, 102, 50)" fill="#ede8e0" />
+        <ellipse cx="102" cy="52" rx="8" ry="11" transform="rotate(15, 102, 52)" fill="#ffb7c5" opacity="0.85" />
+      </motion.g>
+      
+      {/* Eyes */}
+      <circle cx="54" cy="80" r="9" fill="#1a2820" />
+      <circle cx="57" cy="76" r="3" fill="white" />
+      <motion.rect x="45" y="71" width="18" height="9" rx="4" fill="#f0ece4" animate={{ scaleY: [1, 1, 1, 2.2, 1] }} times={[0, 0.88, 0.9, 0.94, 1]} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1.5, transformOrigin: 'center top' }} />
+      
+      <circle cx="86" cy="80" r="9" fill="#1a2820" />
+      <circle cx="89" cy="76" r="3" fill="white" />
+      <motion.rect x="77" y="71" width="18" height="9" rx="4" fill="#f0ece4" animate={{ scaleY: [1, 1, 1, 2.2, 1] }} times={[0, 0.88, 0.9, 0.94, 1]} transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 1.5, transformOrigin: 'center top' }} />
+      
+      {/* Nose */}
+      <ellipse cx="70" cy="90" rx="4" ry="3" fill="#ffb0bc" />
+      
+      {/* Mouth */}
+      {!isBlocking ? (
+        <path d="M 63 95 Q 70 101 77 95" fill="none" stroke="#ffb0bc" strokeWidth="2" strokeLinecap="round" />
+      ) : (
+        <path d="M 63 96 Q 70 94 77 96" fill="none" stroke="#ffb0bc" strokeWidth="2" strokeLinecap="round" />
       )}
-      <ellipse cx={60} cy={86} rx={4} ry={3} fill="#ffb7c5" />
-      <path
-        d={isBlocking ? "M 54 93 Q 60 89 66 93" : "M 54 90 Q 60 95 66 90"}
-        fill="none"
-        stroke="#ffb7c5"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <line x1={20} y1={84} x2={50} y2={87} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={18} y1={89} x2={50} y2={90} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={70} y1={87} x2={100} y2={84} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      <line x1={70} y1={90} x2={102} y2={89} stroke="rgba(255,255,255,0.4)" strokeWidth={1} />
-      {(phase === 'approved' || phase === 'reacting') && (
-        <>
-          <circle cx={40} cy={88} r={8} fill="#ffb7c5" opacity={0.35} />
-          <circle cx={80} cy={88} r={8} fill="#ffb7c5" opacity={0.35} />
-        </>
-      )}
-      <motion.path
-        d="M 98 148 Q 120 170 110 190 Q 100 210 85 195"
-        fill="none"
-        stroke="#f0ede8"
-        strokeWidth={8}
-        strokeLinecap="round"
-        animate={{ rotate: [-8, 8, -8] }}
-        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
-        style={{ transformOrigin: '85px 148px' }}
-      />
+      
+      {/* Angry Eyebrows when blocking */}
+      <AnimatePresence>
+        {isBlocking && (
+          <>
+            <motion.path d="M 42 67 Q 52 61 58 68" fill="none" stroke="#555" strokeWidth="3" strokeLinecap="round" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+            <motion.path d="M 82 68 Q 88 61 98 67" fill="none" stroke="#555" strokeWidth="3" strokeLinecap="round" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} />
+          </>
+        )}
+      </AnimatePresence>
+      
+      {/* Whiskers */}
+      <line x1="10" y1="87" x2="58" y2="89" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      <line x1="8" y1="92" x2="58" y2="92" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      <line x1="12" y1="97" x2="58" y2="95" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      <line x1="82" y1="89" x2="130" y2="87" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      <line x1="82" y1="92" x2="132" y2="92" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      <line x1="82" y1="95" x2="128" y2="97" stroke="rgba(180,160,140,0.45)" strokeWidth="1" />
+      
+      {/* Paws */}
+      <ellipse cx="50" cy="158" rx="14" ry="9" fill="#e0dbd3" />
+      <line x1="44" y1="155" x2="44" y2="163" stroke="#ccc5bc" strokeWidth="1.2" />
+      <ellipse cx="90" cy="158" rx="14" ry="9" fill="#e0dbd3" />
+      <line x1="96" y1="155" x2="96" y2="163" stroke="#ccc5bc" strokeWidth="1.2" />
+      
+      {/* Tail */}
+      <motion.path d="M 114 150 Q 150 140 145 115 Q 140 95 120 105 Q 105 112 110 125" fill="none" stroke="#e8e3db" strokeWidth="12" strokeLinecap="round" animate={{ rotate: [6, -8, 6] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }} style={{ transformOrigin: '114px 150px' }} />
+      
+      {/* Blush */}
+      <AnimatePresence>
+        {(phase === 'approved' || phase === 'reacting') && (
+          <>
+            <motion.ellipse cx="42" cy="94" rx="10" ry="6" fill="#ffb7c5" opacity="0.4" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 0.4, scale: 1 }} exit={{ opacity: 0 }} />
+            <motion.ellipse cx="98" cy="94" rx="10" ry="6" fill="#ffb7c5" opacity="0.4" initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 0.4, scale: 1 }} exit={{ opacity: 0 }} />
+          </>
+        )}
+      </AnimatePresence>
+      
+      {/* Blocking shake */}
+      {phase === 'blocking' && <motion.g animate={{ x: [0, -5, 5, -5, 5, -3, 3, 0] }} transition={{ duration: 0.5 }} />}
     </motion.svg>
   )
+}
+
+interface CatTimeGateProps {
+  onPass: () => void
 }
 
 export function CatTimeGate({ onPass }: CatTimeGateProps) {
-  const [timeAllowed, setTimeAllowed] = useState<boolean | null>(null)
-  const [catPhase, setCatPhase] = useState<
-    'idle' | 'leaning' | 'whisper' | 'reacting' | 'approved' | 'blocking'
-  >('idle')
+  const [catPhase, setCatPhase] = useState<'idle' | 'leaning' | 'whisper' | 'reacting' | 'approved' | 'blocking'>('idle')
   const [whisperText, setWhisperText] = useState('')
   const [whisperVisible, setWhisperVisible] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
   const [showBypass, setShowBypass] = useState(false)
   const [bypassInput, setBypassInput] = useState('')
   const [bypassAttempts, setBypassAttempts] = useState(0)
   const [bypassError, setBypassError] = useState(false)
   const [bypassSuccess, setBypassSuccess] = useState(false)
+  const [timeAllowed, setTimeAllowed] = useState<boolean | null>(null)
 
   useEffect(() => {
     const now = new Date()
-    const birthdayTime = new Date(now.getFullYear(), 5, 10, 22, 10, 0)
-    const isAllowed = now >= birthdayTime
-    setTimeAllowed(isAllowed)
+    const hour = now.getHours()
+    const minute = now.getMinutes()
+    const totalMinutes = hour * 60 + minute
+    const birthdayMinutes = 22 * 60 + 10
+    setTimeAllowed(totalMinutes >= birthdayMinutes)
   }, [])
 
   useEffect(() => {
@@ -288,7 +246,9 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
         await delay(600)
         setCatPhase('whisper')
         setWhisperVisible(true)
-        await typewrite("psst... she's here. it's time. 🎂", 35, setWhisperText)
+        setIsTyping(true)
+        await typewrite('psst... she\'s here. it\'s time. 🎂', 58, setWhisperText)
+        setIsTyping(false)
         await delay(600)
         setCatPhase('reacting')
         await delay(800)
@@ -297,7 +257,9 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
         setCatPhase('approved')
         await delay(600)
         setWhisperVisible(true)
-        await typewrite('happy birthday. welcome. ✨', 35, setWhisperText)
+        setIsTyping(true)
+        await typewrite('happy birthday. welcome. ✨', 55, setWhisperText)
+        setIsTyping(false)
         await delay(600)
         setWhisperVisible(false)
         await delay(400)
@@ -309,18 +271,24 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
         await delay(600)
         setCatPhase('whisper')
         setWhisperVisible(true)
-        await typewrite("wait... she hasn't arrived yet. 👀", 35, setWhisperText)
+        setIsTyping(true)
+        await typewrite('wait... she hasn\'t arrived yet. 👀', 58, setWhisperText)
+        setIsTyping(false)
         await delay(500)
         setCatPhase('blocking')
         setWhisperVisible(false)
         await delay(800)
         setWhisperVisible(true)
-        await typewrite("you're early. you shouldn't be here.", 40, setWhisperText)
+        setIsTyping(true)
+        await typewrite('you\'re early. you shouldn\'t be here.', 62, setWhisperText)
+        setIsTyping(false)
         await delay(500)
         setWhisperVisible(false)
         await delay(600)
         setWhisperVisible(true)
-        await typewrite('...unless you know the word. 🤫', 40, setWhisperText)
+        setIsTyping(true)
+        await typewrite('...unless you know the word. 🤫', 55, setWhisperText)
+        setIsTyping(false)
         await delay(400)
         setWhisperVisible(false)
         await delay(300)
@@ -342,13 +310,17 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
       await delay(600)
       setWhisperText('')
       setWhisperVisible(true)
-      await typewrite('...they know the word. 🪖', 35, setWhisperText)
+      setIsTyping(true)
+      await typewrite('...they know the word. 🪖', 55, setWhisperText)
+      setIsTyping(false)
       await delay(700)
       setCatPhase('approved')
       setWhisperVisible(false)
       await delay(500)
       setWhisperVisible(true)
-      await typewrite('happy birthday, soldier. 🎂', 35, setWhisperText)
+      setIsTyping(true)
+      await typewrite('happy birthday, soldier. 🎂', 55, setWhisperText)
+      setIsTyping(false)
       await delay(800)
       setWhisperVisible(false)
       await delay(400)
@@ -360,26 +332,15 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
       setCatPhase('leaning')
       await delay(500)
       setWhisperVisible(true)
-      await typewrite("that's not it... 🙅", 40, setWhisperText)
+      setIsTyping(true)
+      await typewrite('that\'s not it... 🙅', 50, setWhisperText)
+      setIsTyping(false)
       await delay(600)
       setWhisperVisible(false)
       await delay(300)
       setCatPhase('blocking')
       setTimeout(() => setBypassError(false), 500)
     }
-  }
-
-  const statusText = () => {
-    if (bypassSuccess) {
-      return "🐾 ...they'll allow it. go ahead."
-    }
-    if (catPhase === 'approved') {
-      return '✨ access granted. welcome.'
-    }
-    if (catPhase === 'blocking') {
-      return "🚫 not yet. they're watching."
-    }
-    return '🐾 peach & goma are consulting...'
   }
 
   return (
@@ -392,9 +353,31 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
         transition={{ duration: 0.6 }}
         className="fixed inset-0 z-50 flex items-center justify-center px-6 overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse at 50% 60%, #0a0014 0%, #000000 80%)',
+          background: 'radial-gradient(ellipse at 50% 55%, #0d0020 0%, #050010 50%, #000000 100%)',
         }}
       >
+        {/* Starfield */}
+        {STARS.map((star, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              left: `${star.x}%`,
+              top: `${star.y}%`,
+              width: i % 5 === 0 ? '2px' : '1px',
+              height: i % 5 === 0 ? '2px' : '1px',
+              background: 'white',
+            }}
+            animate={{ opacity: [0.1, 0.5, 0.1] }}
+            transition={{
+              duration: 2 + (i % 4),
+              repeat: Infinity,
+              delay: (i * 0.13) % 3,
+            }}
+          />
+        ))}
+
+        {/* Ambient glow */}
         <motion.div
           className="absolute top-[20%] left-[15%] w-[300px] h-[300px] pointer-events-none"
           style={{
@@ -413,20 +396,25 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
         />
 
         <div className="relative z-10 flex flex-col items-center justify-center gap-8 w-full">
+          {/* Title */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-mono text-xs tracking-widest"
-            style={{ color: 'rgba(191,90,242,0.6)' }}
+            className="flex items-center gap-2 font-mono text-xs tracking-widest"
+            style={{ color: 'rgba(191,90,242,0.5)' }}
           >
-            // SECURITY CHECKPOINT — UNIT: PEACH & GOMA
+            🐾 // SECURITY CHECKPOINT — UNIT: PEACH & GOMA 🐾
           </motion.div>
+          <motion.div
+            className="w-72 h-px mx-auto"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(191,90,242,0.2), transparent)',
+            }}
+          />
 
-          <div
-            className="relative w-[340px] max-[400px]:w-[280px] max-[400px]:scale-90"
-            style={{ height: 280 }}
-          >
+          {/* Cat Scene */}
+          <div className="w-[380px] max-[400px]:w-[290px] max-[400px]:scale-90 max-[400px]:origin-center relative mx-auto" style={{ height: 300 }}>
             <AnimatePresence>
               {whisperVisible && (
                 <motion.div
@@ -435,24 +423,25 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.9, opacity: 0 }}
                   transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="absolute top-0 left-1/2 -translate-x-1/2 z-10"
+                  className="absolute top-0 left-1/2 -translate-x-1/2 z-20"
                 >
                   <div
-                    className="w-[220px] min-h-[60px] rounded-[20px] px-4 py-3 text-center backdrop-blur-lg"
+                    className="w-[240px] min-h-[68px] rounded-[22px] px-[18px] py-[14px] text-center backdrop-blur-[12px] box-shadow"
                     style={{
-                      background: 'rgba(255,255,255,0.07)',
-                      border: '1px solid rgba(255,255,255,0.15)',
+                      background: 'rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      boxShadow: '0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
                     }}
                   >
                     <div
-                      className="font-mono text-xs leading-relaxed"
-                      style={{ color: 'rgba(255,255,255,0.9)' }}
+                      className="font-mono text-sm leading-relaxed"
+                      style={{ color: 'rgba(255,255,255,0.92)', letterSpacing: '0.01em' }}
                     >
                       {whisperText}
-                      {whisperText.length > 0 && (
+                      {isTyping && (
                         <motion.span
-                          animate={{ opacity: [1, 0.3, 1] }}
-                          transition={{ duration: 0.8, repeat: Infinity }}
+                          animate={{ opacity: [1, 0.2, 1] }}
+                          transition={{ duration: 0.7, repeat: Infinity }}
                         >
                           ▌
                         </motion.span>
@@ -462,23 +451,29 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
                   <div
                     className="w-0 h-0 mx-auto"
                     style={{
-                      borderLeft: '8px solid transparent',
-                      borderRight: '8px solid transparent',
-                      borderTop: '10px solid rgba(255,255,255,0.15)',
+                      borderLeft: '10px solid transparent',
+                      borderRight: '10px solid transparent',
+                      borderTop: '12px solid rgba(255,255,255,0.18)',
                     }}
                   />
-                  <div className="flex justify-center gap-1 mt-1">
-                    <div
-                      className="w-2 h-2 rounded-full"
+                  <div className="flex justify-center gap-[6px] mt-[2px]">
+                    <motion.div
+                      className="w-[9px] h-[9px] rounded-full"
                       style={{ background: 'rgba(255,255,255,0.15)' }}
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
                     />
-                    <div
-                      className="w-1.5 h-1.5 rounded-full"
+                    <motion.div
+                      className="w-[7px] h-[7px] rounded-full"
                       style={{ background: 'rgba(255,255,255,0.15)' }}
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
                     />
-                    <div
-                      className="w-1 h-1 rounded-full"
+                    <motion.div
+                      className="w-[5px] h-[5px] rounded-full"
                       style={{ background: 'rgba(255,255,255,0.15)' }}
+                      animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.35, 0.15] }}
+                      transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
                     />
                   </div>
                 </motion.div>
@@ -487,8 +482,17 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
 
             <CatGoma phase={catPhase} isBlocking={catPhase === 'blocking'} />
             <CatPeach phase={catPhase} isBlocking={catPhase === 'blocking'} />
+
+            {/* Floor line */}
+            <div
+              className="absolute bottom-[8px] w-[80%] left-[10%] h-px"
+              style={{
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)',
+              }}
+            />
           </div>
 
+          {/* Status */}
           <AnimatePresence mode="wait">
             <motion.div
               key={`status-${catPhase}`}
@@ -499,10 +503,11 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
               className="font-mono text-xs"
               style={{ color: 'rgba(255,255,255,0.3)' }}
             >
-              {statusText()}
+              {bypassSuccess ? '🐾 ...they\'ll allow it. go ahead.' : catPhase === 'approved' ? '✨ access granted. welcome.' : catPhase === 'blocking' ? '🚫 not yet. they\'re watching.' : '🐾 peach & goma are consulting...'}
             </motion.div>
           </AnimatePresence>
 
+          {/* Bypass Form */}
           <AnimatePresence>
             {showBypass && !bypassSuccess && (
               <motion.div
@@ -530,12 +535,11 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
                     }
                   }}
                   placeholder="say something to peach & goma..."
-                  className="w-full bg-black/60 border border-solid px-4 py-3 font-mono text-sm rounded-lg focus:outline-none"
+                  className="w-full bg-black/60 px-4 py-3 font-mono text-sm rounded-lg focus:outline-none"
                   style={{
-                    borderColor: bypassError
-                      ? 'rgba(255,55,95,0.6)'
-                      : 'rgba(191,90,242,0.3)',
+                    borderColor: bypassError ? 'rgba(255,55,95,0.6)' : 'rgba(191,90,242,0.3)',
                     color: 'white',
+                    border: '1px solid',
                   }}
                   animate={bypassError ? { x: [0, -6, 6, -6, 6, 0] } : { x: 0 }}
                   transition={{ duration: 0.4 }}
@@ -543,10 +547,11 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
 
                 <button
                   onClick={handleBypassSubmit}
-                  className="font-mono text-xs tracking-wide px-7 py-2.5 border border-solid rounded hover:bg-black/30 transition-colors"
+                  className="font-mono text-xs tracking-wide px-7 py-2.5 border rounded hover:bg-black/30 transition-colors"
                   style={{
                     color: 'rgba(191,90,242,0.8)',
                     borderColor: 'rgba(191,90,242,0.3)',
+                    border: '1px solid',
                   }}
                 >
                   whisper it 🤫
