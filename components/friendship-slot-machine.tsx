@@ -66,58 +66,23 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
     }
   }, [])
 
-  // Web Audio Sounds
+  // Web Audio Sounds - Replaced with provided audio files
   const playLeverClick = useCallback(() => {
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.type = 'square'
-      osc.frequency.setValueAtTime(180, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.08)
-      gain.gain.setValueAtTime(0.4, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.12)
-    } catch {}
+    const audio = new Audio('/audio/Laser_Tune.mp3')
+    audio.volume = 0.6
+    audio.play().catch(() => {})
   }, [])
 
-  const playReelStop = useCallback((reelIndex: number) => {
-    const pitches = [220, 196, 174]
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(pitches[reelIndex], ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(pitches[reelIndex] * 0.7, ctx.currentTime + 0.15)
-      gain.gain.setValueAtTime(0.25, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.2)
-    } catch {}
+  const playReelStop = useCallback(() => {
+    const audio = new Audio('/audio/NETFLIX_Sounds_Effect.mp4')
+    audio.volume = 0.5
+    audio.play().catch(() => {})
   }, [])
 
   const playJackpotAlarm = useCallback(() => {
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-      for (let i = 0; i < 6; i++) {
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-        osc.type = 'square'
-        osc.frequency.value = i % 2 === 0 ? 880 : 660
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.12)
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.1)
-        osc.start(ctx.currentTime + i * 0.12)
-        osc.stop(ctx.currentTime + i * 0.12 + 0.1)
-      }
-    } catch {}
+    const audio = new Audio('/audio/Squid_Game.mp4')
+    audio.volume = 0.7
+    audio.play().catch(() => {})
   }, [])
 
   const animateLever = useCallback(() => {
@@ -244,7 +209,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [final1, p[1], p[2]])
           setReelBlurs(p => [false, p[1], p[2]])
           gsap.fromTo(reel1Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop(0)
+          playReelStop()
         },
       })
     }, 900)
@@ -262,7 +227,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [p[0], final2, p[2]])
           setReelBlurs(p => [p[0], false, p[2]])
           gsap.fromTo(reel2Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop(1)
+          playReelStop()
         },
       })
     }, 1500)
@@ -280,7 +245,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [p[0], p[1], final3])
           setReelBlurs(p => [p[0], p[1], false])
           gsap.fromTo(reel3Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop(2)
+          playReelStop()
         },
       })
     }, 2100)
@@ -503,8 +468,8 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
               <div className="h-3 rounded-b-xl mt-2" style={{ background: 'linear-gradient(180deg, #3a5a1a, #2a4a0a)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.6)' }} />
             </motion.div>
 
-            {/* Lever (Desktop) */}
-            <div className="hidden min-[480px]:block absolute right-0 top-1/2 -translate-y-1/3 -mr-12">
+            {/* Lever */}
+            <div className="absolute right-0 top-1/2 -translate-y-1/3 -mr-12">
               <motion.div
                 ref={leverRef}
                 className="cursor-pointer"
@@ -553,22 +518,6 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
                   <div className="absolute w-2.5 h-2.5 rounded-full top-4 left-5" style={{ background: 'rgba(255,255,255,0.45)', filter: 'blur(2px)' }} />
                 </motion.div>
               </motion.div>
-            </div>
-
-            {/* Mobile Button */}
-            <div className="min-[480px]:hidden mt-4">
-              <button
-                onClick={handleSpin}
-                disabled={isSpinning}
-                className="font-mono text-xs tracking-wide px-6 py-2 border rounded hover:bg-black/30 transition-colors"
-                style={{
-                  color: 'rgba(191,90,242,0.8)',
-                  borderColor: 'rgba(191,90,242,0.3)',
-                  border: '1px solid',
-                }}
-              >
-                [ PULL ]
-              </button>
             </div>
 
             {/* Close Button */}
