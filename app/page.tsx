@@ -29,6 +29,8 @@ export default function BirthdayPage() {
   const [catGatePassed, setCatGatePassed] = useState(false)
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
   const [isHacked, setIsHacked] = useState(false)
+  const [slotOpen, setSlotOpen] = useState(false)
+  const [slotUnlocked, setSlotUnlocked] = useState(false)
 
   return (
     <main className="relative">
@@ -57,7 +59,10 @@ export default function BirthdayPage() {
 
       <AnimatePresence mode="wait">
         {isUnlocked && catGatePassed && !cakeBlewOut && (
-          <BirthdayCake onCakeBlewOut={() => setCakeBlewOut(true)} />
+          <BirthdayCake onCakeBlewOut={() => {
+            setCakeBlewOut(true)
+            setTimeout(() => setSlotUnlocked(true), 3000)
+          }} />
         )}
       </AnimatePresence>
 
@@ -83,7 +88,43 @@ export default function BirthdayPage() {
           {/* Fixed position UI elements */}
           <FriendshipCoupons />
           <ApologyBoard />
-          <FriendshipSlotMachine />
+
+          {/* 🎰 SLOT MACHINE BADGE — top right corner */}
+          <AnimatePresence>
+            {slotUnlocked && (
+              <motion.button
+                onClick={() => setSlotOpen(true)}
+                className="fixed top-4 right-4 z-40 w-11 h-11 rounded-full flex items-center justify-center cursor-pointer"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(255,214,10,0.15), rgba(255,159,10,0.1))',
+                  border: '1px solid rgba(255,214,10,0.4)',
+                  boxShadow: '0 0 20px rgba(255,214,10,0.2)',
+                  backdropFilter: 'blur(8px)',
+                }}
+                initial={{ opacity: 0, scale: 0.5, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
+                whileHover={{ scale: 1.1, boxShadow: '0 0 30px rgba(255,214,10,0.4)' }}
+                whileTap={{ scale: 0.92 }}
+                aria-label="Open slot machine"
+              >
+                <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🎰</span>
+                <motion.span
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{ border: '1px solid rgba(255,214,10,0.3)' }}
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                />
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* SLOT MACHINE MODAL */}
+          <FriendshipSlotMachine
+            isOpen={slotOpen}
+            onClose={() => setSlotOpen(false)}
+          />
         </motion.div>
       )}
     </main>
