@@ -10,7 +10,7 @@ const CLUES = [
   `If you still couldn't decode just go back to my texts, and figure out 😜`,
 ]
 
-const CORRECT_KEY = 'Dks'
+const CORRECT_KEY = 'key'
 
 export function EntryGate({ onUnlock, onHacked }: { onUnlock: () => void; onHacked: () => void }) {
   const [terminalLines, setTerminalLines] = useState<string[]>([])
