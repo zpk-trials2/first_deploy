@@ -4,35 +4,31 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 
+interface FriendshipSlotMachineProps {
+  onClose?: () => void
+}
+
 const REEL_1_SYMBOLS = ['🪖', '💣', '⚡', '🎯', 'DKS', '🔥', 'CHAOS']
 const REEL_2_SYMBOLS = ['❤️', '🪖', 'LOCKED', '💥', '🎯', 'DKS', '⚡']
 const REEL_3_SYMBOLS = ['🪖', 'CHAOS', '💣', 'DKS', '🔥', '🎯', '❤️']
+const JACKPOT_COMBO = ['🪖', 'DKS', '🪖']
 
-// Three possible jackpot emoji combinations - guaranteed on 3rd spin
-const JACKPOT_COMBOS = [
-  ['😎', 'DKS', '😎'],
-  ['🙈', 'DKS', '🙈'],
-  ['🤣', 'DKS', '🤣'],
-]
-let lastJackpotCombo = 0
-
-const getJackpotSpins = (): number[] => [3]
-
-function getRandomJackpotCombo(): [string, string, string] {
-  const combo = JACKPOT_COMBOS[lastJackpotCombo % JACKPOT_COMBOS.length]
-  lastJackpotCombo++
-  return combo as [string, string, string]
+const getJackpotSpins = (): number[] => {
+  const spins: number[] = []
+  let current = 0
+  const pattern = [5, 7, 9, 6, 8]
+  for (let i = 0; i < 25; i++) {
+    current += pattern[i % pattern.length]
+    spins.push(current)
+  }
+  return spins
 }
 
-interface FriendshipSlotMachineProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachineProps) {
+export function FriendshipSlotMachine({ onClose }: FriendshipSlotMachineProps) {
+  const [isSlotOpen, setIsSlotOpen] = useState(true)
   const [isSpinning, setIsSpinning] = useState(false)
   const [spinCount, setSpinCount] = useState(0)
-  const [reelValues, setReelValues] = useState<[string, string, string]>(['🎰', '💫', '🎰'])
+  const [reelValues, setReelValues] = useState<[string, string, string]>(['🪖', '❤️', '🪖'])
   const [jackpotTriggered, setJackpotTriggered] = useState(false)
   const [showFlash, setShowFlash] = useState(false)
   const [reelBlurs, setReelBlurs] = useState<[boolean, boolean, boolean]>([false, false, false])
@@ -66,23 +62,58 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
     }
   }, [])
 
-  // Web Audio Sounds - Replaced with provided audio files
+  // Web Audio Sounds
   const playLeverClick = useCallback(() => {
-    const audio = new Audio('/audio/Laser_Tune.mp3')
-    audio.volume = 0.6
-    audio.play().catch(() => {})
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(180, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.08)
+      gain.gain.setValueAtTime(0.4, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.12)
+    } catch {}
   }, [])
 
-  const playReelStop = useCallback(() => {
-    const audio = new Audio('/audio/NETFLIX_Sounds_Effect.mp4')
-    audio.volume = 0.5
-    audio.play().catch(() => {})
+  const playReelStop = useCallback((reelIndex: number) => {
+    const pitches = [220, 196, 174]
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(pitches[reelIndex], ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(pitches[reelIndex] * 0.7, ctx.currentTime + 0.15)
+      gain.gain.setValueAtTime(0.25, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.2)
+    } catch {}
   }, [])
 
   const playJackpotAlarm = useCallback(() => {
-    const audio = new Audio('/audio/Squid_Game.mp4')
-    audio.volume = 0.7
-    audio.play().catch(() => {})
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+      for (let i = 0; i < 6; i++) {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.type = 'square'
+        osc.frequency.value = i % 2 === 0 ? 880 : 660
+        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.12)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.1)
+        osc.start(ctx.currentTime + i * 0.12)
+        osc.stop(ctx.currentTime + i * 0.12 + 0.1)
+      }
+    } catch {}
   }, [])
 
   const animateLever = useCallback(() => {
@@ -191,10 +222,9 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
     intervals.current.push(i1, i2, i3)
 
     const isJackpot = jackpotSpins.current.includes(newSpinCount)
-    const jackpotCombo = isJackpot ? getRandomJackpotCombo() : null
-    const final1 = isJackpot ? jackpotCombo![0] : REEL_1_SYMBOLS[Math.floor(Math.random() * REEL_1_SYMBOLS.length)]
-    const final2 = isJackpot ? jackpotCombo![1] : REEL_2_SYMBOLS[Math.floor(Math.random() * REEL_2_SYMBOLS.length)]
-    const final3 = isJackpot ? jackpotCombo![2] : REEL_3_SYMBOLS[Math.floor(Math.random() * REEL_3_SYMBOLS.length)]
+    const final1 = isJackpot ? JACKPOT_COMBO[0] : REEL_1_SYMBOLS[Math.floor(Math.random() * REEL_1_SYMBOLS.length)]
+    const final2 = isJackpot ? JACKPOT_COMBO[1] : REEL_2_SYMBOLS[Math.floor(Math.random() * REEL_2_SYMBOLS.length)]
+    const final3 = isJackpot ? JACKPOT_COMBO[2] : REEL_3_SYMBOLS[Math.floor(Math.random() * REEL_3_SYMBOLS.length)]
 
     const t1 = setTimeout(() => {
       clearInterval(i1)
@@ -209,7 +239,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [final1, p[1], p[2]])
           setReelBlurs(p => [false, p[1], p[2]])
           gsap.fromTo(reel1Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop()
+          playReelStop(0)
         },
       })
     }, 900)
@@ -227,7 +257,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [p[0], final2, p[2]])
           setReelBlurs(p => [p[0], false, p[2]])
           gsap.fromTo(reel2Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop()
+          playReelStop(1)
         },
       })
     }, 1500)
@@ -245,7 +275,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           setReelValues(p => [p[0], p[1], final3])
           setReelBlurs(p => [p[0], p[1], false])
           gsap.fromTo(reel3Ref.current, { scale: 1.12 }, { scale: 1, duration: 0.25, ease: 'back.out(4)' })
-          playReelStop()
+          playReelStop(2)
         },
       })
     }, 2100)
@@ -272,7 +302,8 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
     }
     timeouts.current.forEach(clearTimeout)
     intervals.current.forEach(clearInterval)
-    onClose()
+    setIsSlotOpen(false)
+    onClose?.()
   }
 
   const handleCollectWinnings = () => {
@@ -283,7 +314,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {isSlotOpen && (
         <motion.div
           key="slot-overlay"
           initial={{ opacity: 0 }}
@@ -468,8 +499,8 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
               <div className="h-3 rounded-b-xl mt-2" style={{ background: 'linear-gradient(180deg, #3a5a1a, #2a4a0a)', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.6)' }} />
             </motion.div>
 
-            {/* Lever */}
-            <div className="absolute right-0 top-1/2 -translate-y-1/3 -mr-12">
+            {/* Lever (Desktop) */}
+            <div className="hidden min-[480px]:block absolute right-0 top-1/2 -translate-y-1/3 -mr-12">
               <motion.div
                 ref={leverRef}
                 className="cursor-pointer"
@@ -518,6 +549,22 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
                   <div className="absolute w-2.5 h-2.5 rounded-full top-4 left-5" style={{ background: 'rgba(255,255,255,0.45)', filter: 'blur(2px)' }} />
                 </motion.div>
               </motion.div>
+            </div>
+
+            {/* Mobile Button */}
+            <div className="min-[480px]:hidden mt-4">
+              <button
+                onClick={handleSpin}
+                disabled={isSpinning}
+                className="font-mono text-xs tracking-wide px-6 py-2 border rounded hover:bg-black/30 transition-colors"
+                style={{
+                  color: 'rgba(191,90,242,0.8)',
+                  borderColor: 'rgba(191,90,242,0.3)',
+                  border: '1px solid',
+                }}
+              >
+                [ PULL ]
+              </button>
             </div>
 
             {/* Close Button */}
