@@ -138,6 +138,7 @@ export function FriendshipPlaylist() {
     const audio = new Audio()
     audio.volume = 0.8
     audio.preload = 'none'
+    audio.crossOrigin = 'anonymous'
     audioRef.current = audio
 
     audio.addEventListener('timeupdate', () => setCurrentTime(audio.currentTime))
@@ -148,7 +149,8 @@ export function FriendshipPlaylist() {
     audio.addEventListener('ended', () => {
       setCurrentTrack(prev => prev === null ? null : (prev + 1) % playlist.length)
     })
-    audio.addEventListener('error', () => {
+    audio.addEventListener('error', (e) => {
+      console.log('[v0] Audio error:', (e.target as HTMLAudioElement)?.error?.message)
       setIsLoading(false)
       setAudioError(true)
       setIsPlaying(false)
@@ -174,12 +176,26 @@ export function FriendshipPlaylist() {
     setIsLoading(true)
     setCurrentTime(0)
     setDuration(0)
-    audioRef.current.src = playlist[currentTrack].file
+    
+    const trackFile = playlist[currentTrack].file
+    audioRef.current.src = trackFile
     audioRef.current.load()
+    
+    // Set a timeout to catch if the file never loads
+    const loadTimeout = setTimeout(() => {
+      if (audioRef.current && audioRef.current.readyState === 0) {
+        setAudioError(true)
+        setIsLoading(false)
+        setIsPlaying(false)
+      }
+    }, 3000)
+    
     audioRef.current.play().catch(() => {
       setIsPlaying(false)
       setIsLoading(false)
     })
+    
+    return () => clearTimeout(loadTimeout)
   }, [currentTrack])
 
   useEffect(() => {
@@ -340,14 +356,20 @@ export function FriendshipPlaylist() {
                 {/* Error State */}
                 <AnimatePresence>
                   {audioError && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="font-mono text-xs italic"
-                      style={{ color: 'rgba(255,55,95,0.7)' }}
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="p-3 rounded-lg mt-2 text-center"
+                      style={{ background: 'rgba(255,55,95,0.08)', border: '1px solid rgba(255,55,95,0.2)' }}
                     >
-                      // file not found — add mp3 to /public/music/
-                    </motion.p>
+                      <p className="font-mono text-xs" style={{ color: 'rgba(255,55,95,0.6)' }}>
+                        Audio file not available. Add .mp3 files to /public/music/ directory.
+                      </p>
+                      <p className="font-mono text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                        Expected: {playlist[currentTrack]?.file}
+                      </p>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
