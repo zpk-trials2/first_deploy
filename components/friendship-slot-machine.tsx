@@ -4,31 +4,35 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
 
-interface FriendshipSlotMachineProps {
-  onClose?: () => void
-}
-
 const REEL_1_SYMBOLS = ['🪖', '💣', '⚡', '🎯', 'DKS', '🔥', 'CHAOS']
 const REEL_2_SYMBOLS = ['❤️', '🪖', 'LOCKED', '💥', '🎯', 'DKS', '⚡']
 const REEL_3_SYMBOLS = ['🪖', 'CHAOS', '💣', 'DKS', '🔥', '🎯', '❤️']
-const JACKPOT_COMBO = ['🪖', 'DKS', '🪖']
 
-const getJackpotSpins = (): number[] => {
-  const spins: number[] = []
-  let current = 0
-  const pattern = [5, 7, 9, 6, 8]
-  for (let i = 0; i < 25; i++) {
-    current += pattern[i % pattern.length]
-    spins.push(current)
-  }
-  return spins
+// Three possible jackpot emoji combinations - guaranteed on 3rd spin
+const JACKPOT_COMBOS = [
+  ['😎', 'DKS', '😎'],
+  ['🙈', 'DKS', '🙈'],
+  ['🤣', 'DKS', '🤣'],
+]
+let lastJackpotCombo = 0
+
+const getJackpotSpins = (): number[] => [3]
+
+function getRandomJackpotCombo(): [string, string, string] {
+  const combo = JACKPOT_COMBOS[lastJackpotCombo % JACKPOT_COMBOS.length]
+  lastJackpotCombo++
+  return combo as [string, string, string]
 }
 
-export function FriendshipSlotMachine({ onClose }: FriendshipSlotMachineProps) {
-  const [isSlotOpen, setIsSlotOpen] = useState(true)
+interface FriendshipSlotMachineProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachineProps) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [spinCount, setSpinCount] = useState(0)
-  const [reelValues, setReelValues] = useState<[string, string, string]>(['🪖', '❤️', '🪖'])
+  const [reelValues, setReelValues] = useState<[string, string, string]>(['🎰', '💫', '🎰'])
   const [jackpotTriggered, setJackpotTriggered] = useState(false)
   const [showFlash, setShowFlash] = useState(false)
   const [reelBlurs, setReelBlurs] = useState<[boolean, boolean, boolean]>([false, false, false])
@@ -222,9 +226,10 @@ export function FriendshipSlotMachine({ onClose }: FriendshipSlotMachineProps) {
     intervals.current.push(i1, i2, i3)
 
     const isJackpot = jackpotSpins.current.includes(newSpinCount)
-    const final1 = isJackpot ? JACKPOT_COMBO[0] : REEL_1_SYMBOLS[Math.floor(Math.random() * REEL_1_SYMBOLS.length)]
-    const final2 = isJackpot ? JACKPOT_COMBO[1] : REEL_2_SYMBOLS[Math.floor(Math.random() * REEL_2_SYMBOLS.length)]
-    const final3 = isJackpot ? JACKPOT_COMBO[2] : REEL_3_SYMBOLS[Math.floor(Math.random() * REEL_3_SYMBOLS.length)]
+    const jackpotCombo = isJackpot ? getRandomJackpotCombo() : null
+    const final1 = isJackpot ? jackpotCombo![0] : REEL_1_SYMBOLS[Math.floor(Math.random() * REEL_1_SYMBOLS.length)]
+    const final2 = isJackpot ? jackpotCombo![1] : REEL_2_SYMBOLS[Math.floor(Math.random() * REEL_2_SYMBOLS.length)]
+    const final3 = isJackpot ? jackpotCombo![2] : REEL_3_SYMBOLS[Math.floor(Math.random() * REEL_3_SYMBOLS.length)]
 
     const t1 = setTimeout(() => {
       clearInterval(i1)
@@ -302,8 +307,7 @@ export function FriendshipSlotMachine({ onClose }: FriendshipSlotMachineProps) {
     }
     timeouts.current.forEach(clearTimeout)
     intervals.current.forEach(clearInterval)
-    setIsSlotOpen(false)
-    onClose?.()
+    onClose()
   }
 
   const handleCollectWinnings = () => {
@@ -314,7 +318,7 @@ export function FriendshipSlotMachine({ onClose }: FriendshipSlotMachineProps) {
 
   return (
     <AnimatePresence>
-      {isSlotOpen && (
+      {isOpen && (
         <motion.div
           key="slot-overlay"
           initial={{ opacity: 0 }}
