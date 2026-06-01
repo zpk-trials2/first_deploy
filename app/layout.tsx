@@ -51,8 +51,6 @@ export default function RootLayout({
       <head>
         {/* Preload 3D model for faster loading */}
         <link rel="preload" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/grim_reaper_with_golden_angel_dark_wings-UIapNESP2iFXd6QFlTCQZw52ZvZQuD.glb" as="fetch" crossOrigin="anonymous" />
-      </head>
-      <head>
         <script async src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${cormorantGaramond.variable} font-sans antialiased`}>

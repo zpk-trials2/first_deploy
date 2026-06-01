@@ -5,9 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MatrixRain } from './matrix-rain'
 
 const CLUES = [
-  `She answers to a name that starts like "Darkness" but ends like a key... 3 letters. Case-sensitive.`,
-  `D + ks. It's right there in the name itself.`,
-  `Come on. It's literally her initials. D... k... s...`,
+  `The Token alloted to you Diksha. It's of 3 letters`,
+  `Come on you know I even see if it's case sensitive .`,
+  `If you still couldn't decode just go back to my texts, and figure out 😜`,
 ]
 
 const CORRECT_KEY = 'Dks'
