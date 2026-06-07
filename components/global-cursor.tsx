@@ -14,12 +14,6 @@ interface ClickStar {
   offsetY: number
 }
 
-interface TrailDot {
-  x: number
-  y: number
-  id: number
-}
-
 export function GlobalCursor() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
