@@ -17,6 +17,7 @@ import { EnvelopeLetters } from '@/components/envelope-letters'
 import { EmotionalClosing } from '@/components/emotional-closing'
 import { NextYearCountdown } from '@/components/next-year-countdown'
 import { FloatingBubbles } from '@/components/floating-bubbles'
+import { GlobalCursor } from '@/components/global-cursor'
 import { FriendshipCoupons } from '@/components/friendship-coupons'
 import { ApologyBoard } from '@/components/apology-board'
 import { FriendshipSlotMachine } from '@/components/friendship-slot-machine'
@@ -47,6 +48,7 @@ export default function BirthdayPage() {
 
   return (
     <main className="relative">
+      <GlobalCursor />
       <FloatingBubbles />
       
       <AnimatePresence mode="wait">
