@@ -24,9 +24,7 @@ export function GlobalCursor() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovering, setIsHovering] = useState(false)
   const [clickStars, setClickStars] = useState<ClickStar[]>([])
-  const [trail, setTrail] = useState<TrailDot[]>([])
   const [isTouchDevice, setIsTouchDevice] = useState(true)
-  const trailIdRef = useRef(0)
   const starIdRef = useRef(0)
 
   const springConfig = { stiffness: 200, damping: 20 }
@@ -47,13 +45,6 @@ export function GlobalCursor() {
       setMousePos({ x: e.clientX, y: e.clientY })
       cursorX.set(e.clientX - 7)
       cursorY.set(e.clientY - 7)
-
-      // Update trail
-      trailIdRef.current++
-      setTrail(prev => {
-        const newTrail = [...prev, { x: e.clientX, y: e.clientY, id: trailIdRef.current }]
-        return newTrail.slice(-10)
-      })
     }
 
     const handleMouseEnter = (e: Event) => {
@@ -116,22 +107,6 @@ export function GlobalCursor() {
 
   return (
     <>
-      {/* Trail dots */}
-      <div className="fixed inset-0 pointer-events-none z-[9997]">
-        {trail.map((dot, index) => (
-          <div
-            key={dot.id}
-            className="absolute w-1 h-1 rounded-full"
-            style={{
-              left: dot.x - 2,
-              top: dot.y - 2,
-              backgroundColor: index % 2 === 0 ? '#00d4ff' : '#bf5af2',
-              opacity: (index / trail.length) * 0.6,
-            }}
-          />
-        ))}
-      </div>
-
       {/* Main cursor */}
       <motion.div
         className="fixed pointer-events-none z-[9999] rounded-full"
