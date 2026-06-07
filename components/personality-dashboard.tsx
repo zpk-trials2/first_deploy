@@ -404,7 +404,7 @@ function RadarChartWithEffects() {
             stroke="#00d4ff"
             fill="url(#radarGradient)"
             strokeWidth={2}
-            animationDuration={2000}
+            animationDuration={800}
             animationBegin={isInView ? 0 : 99999}
           />
         </RadarChart>
