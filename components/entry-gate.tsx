@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MatrixRain } from './matrix-rain'
+import { audioManager } from '@/lib/audio-manager'
 
 const CLUES = [
   `The Token alloted to you Diksha. It's of 3 letters`,
@@ -185,7 +186,7 @@ export function EntryGate({ onUnlock, onHacked }: { onUnlock: () => void; onHack
       setIsUnlocking(true)
       await scrambleText()
       setShowScanlines(true)
-      playChime()
+      audioManager.playLaserTune()
       await new Promise(resolve => setTimeout(resolve, 800))
       onHacked()
     } else {
@@ -213,7 +214,6 @@ export function EntryGate({ onUnlock, onHacked }: { onUnlock: () => void; onHack
       setIsUnlocking(true)
       await scrambleText()
       setShowScanlines(true)
-      playChime()
       await new Promise(resolve => setTimeout(resolve, 800))
       onUnlock()
     } else {

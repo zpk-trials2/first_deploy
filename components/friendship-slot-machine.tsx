@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { audioManager } from '@/lib/audio-manager'
 
 const REEL_1_SYMBOLS = ['🪖', '💣', '⚡', '🎯', 'DKS', '🔥', 'CHAOS']
 const REEL_2_SYMBOLS = ['❤️', '🪖', 'LOCKED', '💥', '🎯', 'DKS', '⚡']
@@ -326,6 +327,7 @@ export function FriendshipSlotMachine({ isOpen, onClose }: FriendshipSlotMachine
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4 }}
           className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+          onAnimationComplete={() => audioManager.playSuzume()}
         >
           {/* 360 Panorama Background */}
           <iframe
