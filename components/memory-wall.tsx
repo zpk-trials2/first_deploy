@@ -81,7 +81,7 @@ export function MemoryWall({ isOpen, onClose }: MemoryWallProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-[1000] pointer-events-auto bg-black/80 backdrop-blur-sm"
         >
           <motion.div
             ref={containerRef}
@@ -90,7 +90,7 @@ export function MemoryWall({ isOpen, onClose }: MemoryWallProps) {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
-            className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden"
+            className="relative w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing"
             style={{
               background: 'radial-gradient(ellipse at center, #1a0f2e 0%, #0a0812 100%)',
               perspective: '1200px',
