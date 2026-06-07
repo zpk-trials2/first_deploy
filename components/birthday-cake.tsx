@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { audioManager } from '@/lib/audio-manager'
 
 interface BirthdayCakeProps {
   onCakeBlewOut: () => void
@@ -93,6 +94,7 @@ export function BirthdayCake({ onCakeBlewOut }: BirthdayCakeProps) {
     // Small delay before confetti
     setTimeout(() => {
       playSuccessSound()
+      audioManager.playSquidGameTune()
       triggerConfetti()
     }, 300)
 

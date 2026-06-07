@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { EntryGate } from '@/components/entry-gate'
 import { BirthdayCake } from '@/components/birthday-cake'
@@ -17,12 +17,14 @@ import { EnvelopeLetters } from '@/components/envelope-letters'
 import { EmotionalClosing } from '@/components/emotional-closing'
 import { NextYearCountdown } from '@/components/next-year-countdown'
 import { FloatingBubbles } from '@/components/floating-bubbles'
-import { GlobalCursor } from '@/components/global-cursor'
 import { FriendshipCoupons } from '@/components/friendship-coupons'
 import { ApologyBoard } from '@/components/apology-board'
 import { FriendshipSlotMachine } from '@/components/friendship-slot-machine'
 import { GrimReaper404 } from '@/components/grim-reaper-404'
 import { CatTimeGate } from '@/components/cat-time-gate'
+
+// Preload the 3D model in the background on page load
+const GLB_URL = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/grim_reaper_with_golden_angel_dark_wings-UIapNESP2iFXd6QFlTCQZw52ZvZQuD.glb'
 
 export default function BirthdayPage() {
   const [isUnlocked, setIsUnlocked] = useState(false)
@@ -30,9 +32,21 @@ export default function BirthdayPage() {
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
   const [isHacked, setIsHacked] = useState(false)
 
+  // Preload the 3D model when component mounts
+  useEffect(() => {
+    // Preload the GLB model by fetching it in the background
+    const preloadModel = async () => {
+      try {
+        await fetch(GLB_URL, { mode: 'cors' })
+      } catch (error) {
+        console.log('[v0] Model preload initiated')
+      }
+    }
+    preloadModel()
+  }, [])
+
   return (
     <main className="relative">
-      <GlobalCursor />
       <FloatingBubbles />
       
       <AnimatePresence mode="wait">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { audioManager } from '@/lib/audio-manager'
 
 const SECRET_WORD = 'soldier'
 
@@ -321,9 +322,10 @@ export function CatTimeGate({ onPass }: CatTimeGateProps) {
       setIsTyping(true)
       await typewrite('happy birthday, soldier. 🎂', 55, setWhisperText)
       setIsTyping(false)
-      await delay(800)
+      await delay(10)
       setWhisperVisible(false)
-      await delay(400)
+      audioManager.playNetflixIntro()
+      await delay(0)
       onPass()
     } else {
       setBypassAttempts(prev => prev + 1)

@@ -11,7 +11,7 @@ const playlist = [
     artist: "Billie Eilish & Khalid", 
     duration: "3:20", 
     note: "This one played on repeat during that one conversation.",
-    url: "https://open.spotify.com/track/3cebQIVs9mVGmwxcbLe0Cb?si=2c8b7f1d8c3b4a5e"
+    url: "/music/lovely.mp3"
   },
   { 
     num: "02", 
@@ -19,7 +19,7 @@ const playlist = [
     artist: "Lord Huron", 
     duration: "3:28", 
     note: "Every time I hear this, I think of you.",
-    url: "https://open.spotify.com/track/05rYcL0aKv3IY1S0M3qhZG?si=1b2c3d4e5f6g7h8i"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/the-night-we-met-8Xp9kL2m3Q.mp3"
   },
   { 
     num: "03", 
@@ -27,7 +27,7 @@ const playlist = [
     artist: "Olivia Rodrigo", 
     duration: "4:02", 
     note: "You made me listen to this at 2am. Worth it.",
-    url: "https://open.spotify.com/track/5GWQbVKIcuDp1dMTZ5mI4v?si=9j0k1l2m3n4o5p6q"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/drivers-license-4Rt6wJ1h8N.mp3"
   },
   { 
     num: "04", 
@@ -35,7 +35,7 @@ const playlist = [
     artist: "Taylor Swift", 
     duration: "3:59", 
     note: "Certified our chaos era.",
-    url: "https://open.spotify.com/track/6UCJRV1W4QZOoHmHvfbFQF?si=7r8s9t0u1v2w3x4y"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/cardigan-7Zc3fP9bE2.mp3"
   },
   { 
     num: "05", 
@@ -43,7 +43,7 @@ const playlist = [
     artist: "SZA", 
     duration: "2:37", 
     note: "This is just... us. Somehow.",
-    url: "https://open.spotify.com/track/0HEekbSpCXuMyG2MBeLLxI?si=5z6a7b8c9d0e1f2g"
+    url: "/music/saturn.mp3"
   },
   { 
     num: "06", 
@@ -51,7 +51,7 @@ const playlist = [
     artist: "Kali Uchis", 
     duration: "2:54", 
     note: "Because sometimes no words are needed.",
-    url: "https://open.spotify.com/track/5H3pZnDdYKG0bvHq9iBqYe?si=3h4i5j6k7l8m9n0o"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/telepatia-2Wn6pR9jV3.mp3"
   },
   { 
     num: "07", 
@@ -59,7 +59,7 @@ const playlist = [
     artist: "Tyler the Creator", 
     duration: "3:44", 
     note: "For the quiet moments between us.",
-    url: "https://open.spotify.com/track/4JglsKs3pEugW3BYt38aJM?si=1p2q3r4s5t6u7v8w"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/see-you-again-9Fj4tL8wM5.mp3"
   },
   { 
     num: "08", 
@@ -67,7 +67,7 @@ const playlist = [
     artist: "Taylor Swift", 
     duration: "3:52", 
     note: "Don't look at me.",
-    url: "https://open.spotify.com/track/3d0M0nL5l0AYqDTjNDgOxl?si=9x0y1z2a3b4c5d6e"
+    url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/you-belong-with-me-6Pk2sN7xH1.mp3"
   }
 ]
 
@@ -93,16 +93,17 @@ function EqualizerIcon() {
   )
 }
 
-function TrackRow({ track, index, currentTrack, onPlayClick }: { 
+function TrackRow({ track, index, currentTrack, isPlaying, onPlayClick }: { 
   track: typeof playlist[0]
   index: number
   currentTrack: string | null
+  isPlaying: boolean
   onPlayClick: (url: string, title: string) => void
 }) {
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true })
-  const isPlaying = currentTrack === track.url
+  const isCurrentTrack = currentTrack === track.url
 
   return (
     <motion.div
@@ -114,7 +115,7 @@ function TrackRow({ track, index, currentTrack, onPlayClick }: {
       <div
         className="group px-4 py-3 rounded-lg transition-all cursor-pointer"
         style={{
-          background: isPlaying ? 'rgba(0, 212, 255, 0.1)' : isHovered ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
+          background: isCurrentTrack ? 'rgba(0, 212, 255, 0.1)' : isHovered ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -122,12 +123,12 @@ function TrackRow({ track, index, currentTrack, onPlayClick }: {
         <div className="flex items-center gap-4">
           {/* Track number / Play button */}
           <div className="w-8 flex justify-center">
-            {isHovered || isPlaying ? (
+            {isHovered || isCurrentTrack ? (
               <button 
                 onClick={() => onPlayClick(track.url, track.title)}
                 className="p-1 hover:scale-110 transition-transform"
               >
-                {isPlaying ? (
+                {isCurrentTrack && isPlaying ? (
                   <Pause className="w-4 h-4" style={{ color: '#00d4ff' }} fill="#00d4ff" />
                 ) : (
                   <Play className="w-4 h-4" style={{ color: '#00d4ff' }} fill="#00d4ff" />
@@ -140,7 +141,7 @@ function TrackRow({ track, index, currentTrack, onPlayClick }: {
 
           {/* Title and Artist */}
           <div className="flex-1 min-w-0">
-            <p className={`font-medium truncate ${isPlaying ? 'text-[#00d4ff]' : 'text-white'}`}>{track.title}</p>
+            <p className={`font-medium truncate ${isCurrentTrack ? 'text-[#00d4ff]' : 'text-white'}`}>{track.title}</p>
             <p className="text-sm truncate" style={{ color: '#94a3b8' }}>{track.artist}</p>
           </div>
 
@@ -169,7 +170,7 @@ function TrackRow({ track, index, currentTrack, onPlayClick }: {
   )
 }
 
-function WaveformBars() {
+function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
   return (
     <div className="flex items-end justify-center gap-[2px] h-8">
       {Array.from({ length: 20 }).map((_, i) => (
@@ -179,12 +180,12 @@ function WaveformBars() {
           style={{
             background: `linear-gradient(to top, #00d4ff, #00a3cc)`,
           }}
-          animate={{
+          animate={isPlaying ? {
             height: ['8px', `${12 + Math.random() * 20}px`, '6px', `${10 + Math.random() * 18}px`, '8px'],
-          }}
+          } : { height: '6px' }}
           transition={{
             duration: 0.5 + Math.random() * 0.5,
-            repeat: Infinity,
+            repeat: isPlaying ? Infinity : 0,
             ease: 'easeInOut',
             delay: i * 0.05,
           }}
@@ -196,10 +197,58 @@ function WaveformBars() {
 
 export function FriendshipPlaylist() {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' })
   const [progress, setProgress] = useState(0)
   const [currentTrack, setCurrentTrack] = useState<string | null>(null)
   const [currentTrackTitle, setCurrentTrackTitle] = useState('01 — lovely')
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState('0:00')
+  const [duration, setDuration] = useState('0:00')
+  const [progressPercent, setProgressPercent] = useState(0)
+
+  // Initialize audio element on mount
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio()
+      audioRef.current.volume = 0.8
+      audioRef.current.crossOrigin = 'anonymous'
+    }
+
+    const audio = audioRef.current
+
+    const handleTimeUpdate = () => {
+      const current = Math.floor(audio.currentTime)
+      const mins = Math.floor(current / 60)
+      const secs = current % 60
+      setCurrentTime(`${mins}:${String(secs).padStart(2, '0')}`)
+      
+      if (audio.duration) {
+        setProgressPercent((current / audio.duration) * 100)
+      }
+    }
+
+    const handleLoadedMetadata = () => {
+      const mins = Math.floor(audio.duration / 60)
+      const secs = Math.floor(audio.duration % 60)
+      setDuration(`${mins}:${String(secs).padStart(2, '0')}`)
+    }
+
+    const handleEnded = () => {
+      setIsPlaying(false)
+    }
+
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audio.addEventListener('ended', handleEnded)
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate)
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      audio.removeEventListener('ended', handleEnded)
+      audio.pause()
+    }
+  }, [])
 
   useEffect(() => {
     if (!isInView) return
@@ -216,13 +265,27 @@ export function FriendshipPlaylist() {
   }, [isInView])
 
   const handlePlayClick = (url: string, title: string) => {
+    const audio = audioRef.current
+    if (!audio) return
+
     if (currentTrack === url) {
-      setCurrentTrack(null)
+      // Toggle play/pause for same track
+      if (isPlaying) {
+        audio.pause()
+        setIsPlaying(false)
+      } else {
+        audio.play().catch(() => {})
+        setIsPlaying(true)
+      }
     } else {
+      // Play new track
+      audio.src = url
+      audio.currentTime = 0
+      audio.play().catch(() => {})
       setCurrentTrack(url)
       setCurrentTrackTitle(title)
-      // Open Spotify in new tab
-      window.open(url, '_blank')
+      setIsPlaying(true)
+      setProgressPercent(0)
     }
   }
 
@@ -282,6 +345,7 @@ export function FriendshipPlaylist() {
                 track={track} 
                 index={index}
                 currentTrack={currentTrack}
+                isPlaying={isPlaying}
                 onPlayClick={handlePlayClick}
               />
             ))}
@@ -297,11 +361,11 @@ export function FriendshipPlaylist() {
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-white">{currentTrackTitle}</span>
-              <span className="text-xs font-mono" style={{ color: '#64748b' }}>1:47 / 3:20</span>
+              <span className="text-xs font-mono" style={{ color: '#64748b' }}>{currentTime} / {duration}</span>
             </div>
 
             {/* Waveform */}
-            <WaveformBars />
+            <WaveformBars isPlaying={isPlaying} />
 
             {/* Progress bar */}
             <div className="mt-3 h-1 rounded-full" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
@@ -312,7 +376,7 @@ export function FriendshipPlaylist() {
                   boxShadow: '0 0 10px rgba(0, 212, 255, 0.5)',
                 }}
                 initial={{ width: '0%' }}
-                animate={{ width: `${progress}%` }}
+                animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 0.1 }}
               />
             </div>
