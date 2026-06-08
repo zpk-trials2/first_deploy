@@ -23,7 +23,7 @@ import { ApologyBoard } from '@/components/apology-board'
 import { FriendshipSlotMachine } from '@/components/friendship-slot-machine'
 import { GrimReaper404 } from '@/components/grim-reaper-404'
 import { CatTimeGate } from '@/components/cat-time-gate'
-import { MemoryWall } from '@/components/memory-wall'
+import { MemoryDomeGallery } from '@/components/memory-dome-gallery'
 
 // Preload the 3D model in the background on page load
 const GLB_URL = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/grim_reaper_with_golden_angel_dark_wings-UIapNESP2iFXd6QFlTCQZw52ZvZQuD.glb'
@@ -33,7 +33,6 @@ export default function BirthdayPage() {
   const [catGatePassed, setCatGatePassed] = useState(false)
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
   const [isHacked, setIsHacked] = useState(false)
-  const [memoryWallOpen, setMemoryWallOpen] = useState(false)
 
   // Preload the 3D model when component mounts
   useEffect(() => {
@@ -100,9 +99,9 @@ export default function BirthdayPage() {
           
           {/* Fixed position UI elements */}
           <FriendshipCoupons />
-          <ApologyBoard onMemoryWallClick={() => setMemoryWallOpen(true)} />
+          <ApologyBoard />
           <FriendshipSlotMachine />
-          <MemoryWall isOpen={memoryWallOpen} onClose={() => setMemoryWallOpen(false)} />
+          <MemoryDomeGallery />
         </motion.div>
       )}
     </main>
