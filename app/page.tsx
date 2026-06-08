@@ -33,6 +33,7 @@ export default function BirthdayPage() {
   const [catGatePassed, setCatGatePassed] = useState(false)
   const [cakeBlewOut, setCakeBlewOut] = useState(false)
   const [isHacked, setIsHacked] = useState(false)
+  const [showMemoryWall, setShowMemoryWall] = useState(false)
 
   // Preload the 3D model when component mounts
   useEffect(() => {
@@ -99,9 +100,13 @@ export default function BirthdayPage() {
           
           {/* Fixed position UI elements */}
           <FriendshipCoupons />
-          <ApologyBoard />
+          <ApologyBoard onMemoryWallClick={() => setShowMemoryWall(true)} />
           <FriendshipSlotMachine />
-          <MemoryDomeGallery />
+          {showMemoryWall && (
+            <div onClick={() => setShowMemoryWall(false)}>
+              <MemoryDomeGallery />
+            </div>
+          )}
         </motion.div>
       )}
     </main>

@@ -71,7 +71,7 @@ const APOLOGIES: Apology[] = [
   },
 ]
 
-export function ApologyBoard() {
+export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => void }) {
   const [isOpen, setIsOpen] = useState(false)
   const [acceptedApologies, setAcceptedApologies] = useState<Set<string>>(new Set())
   const [showMore, setShowMore] = useState(false)
@@ -305,6 +305,25 @@ export function ApologyBoard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Memory Wall Button - positioned above Apologies */}
+      <motion.button
+        onClick={onMemoryWallClick}
+        className="fixed bottom-20 left-6 z-40 px-4 py-2 rounded-full flex items-center gap-2"
+        style={{
+          background: 'linear-gradient(135deg, #00d4ff, #764ba2)',
+          boxShadow: '0 0 25px rgba(0, 212, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3)',
+          color: '#fff',
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 2.3, type: 'spring' }}
+        title="View the Memory Wall gallery"
+      >
+        <span className="text-sm font-medium">Memory Wall</span>
+      </motion.button>
     </>
   )
 }
