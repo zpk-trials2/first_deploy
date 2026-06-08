@@ -102,11 +102,25 @@ export default function BirthdayPage() {
           <FriendshipCoupons />
           <ApologyBoard onMemoryWallClick={() => setShowMemoryWall(true)} />
           <FriendshipSlotMachine />
-          {showMemoryWall && (
-            <div onClick={() => setShowMemoryWall(false)}>
-              <MemoryDomeGallery />
-            </div>
-          )}
+          
+          {/* Memory Wall Modal Overlay */}
+          <AnimatePresence>
+            {showMemoryWall && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    setShowMemoryWall(false)
+                  }
+                }}
+                className="fixed inset-0 z-[999] bg-black/90"
+              >
+                <MemoryDomeGallery />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
       )}
     </main>
