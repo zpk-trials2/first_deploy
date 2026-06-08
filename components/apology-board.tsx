@@ -97,24 +97,6 @@ export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => 
 
   return (
     <>
-      {/* Memory Wall Navigation Button */}
-      <motion.button
-        onClick={onMemoryWallClick}
-        className="fixed bottom-24 left-6 z-40 px-4 py-2 rounded-full flex items-center gap-2 cursor-pointer"
-        style={{
-          background: 'linear-gradient(135deg, #667eea, #764ba2)',
-          boxShadow: '0 0 25px rgba(102, 126, 234, 0.5), 0 4px 15px rgba(0, 0, 0, 0.3)',
-          color: '#fff',
-        }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 2.2, type: 'spring' }}
-      >
-        <span className="text-sm font-medium">Memory Wall</span>
-      </motion.button>
-
       {/* Fixed badge button */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
@@ -323,6 +305,25 @@ export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Memory Wall Button - positioned above Apologies */}
+      <motion.button
+        onClick={onMemoryWallClick}
+        className="fixed bottom-20 left-6 z-40 px-4 py-2 rounded-full flex items-center gap-2"
+        style={{
+          background: 'linear-gradient(135deg, #00d4ff, #764ba2)',
+          boxShadow: '0 0 25px rgba(0, 212, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3)',
+          color: '#fff',
+        }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 2.3, type: 'spring' }}
+        title="View the Memory Wall gallery"
+      >
+        <span className="text-sm font-medium">Memory Wall</span>
+      </motion.button>
     </>
   )
 }
