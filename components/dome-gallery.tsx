@@ -35,7 +35,7 @@ export function DomeGallery({ onClose }: { onClose?: () => void }) {
     const width = containerRef.current.clientWidth
     const height = containerRef.current.clientHeight
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000)
-    camera.position.z = 0
+    camera.position.z = 1500
     cameraRef.current = camera
 
     // RENDERER SETUP
@@ -68,27 +68,52 @@ export function DomeGallery({ onClose }: { onClose?: () => void }) {
 
       const geometry = new THREE.PlaneGeometry(200, 200)
 
-      textureLoader.load(imgData.src, (texture) => {
-        const material = new THREE.MeshStandardMaterial({
-          map: texture,
-          emissive: new THREE.Color(0x00d4ff),
-          emissiveIntensity: 0.1,
-          metalness: 0.3,
-          roughness: 0.4,
-        })
+      textureLoader.load(
+        imgData.src,
+        (texture) => {
+          const material = new THREE.MeshStandardMaterial({
+            map: texture,
+            emissive: new THREE.Color(0x00d4ff),
+            emissiveIntensity: 0.1,
+            metalness: 0.3,
+            roughness: 0.4,
+          })
 
-        const mesh = new THREE.Mesh(geometry, material)
-        mesh.position.set(x, y, z)
+          const mesh = new THREE.Mesh(geometry, material)
+          mesh.position.set(x, y, z)
 
-        const direction = new THREE.Vector3(x, y, z).normalize()
-        mesh.lookAt(direction.multiplyScalar(RADIUS + 100))
+          const direction = new THREE.Vector3(x, y, z).normalize()
+          mesh.lookAt(direction.multiplyScalar(RADIUS + 100))
 
-        ;(mesh as any).imageData = imgData
-        ;(mesh as any).originalPosition = new THREE.Vector3(x, y, z)
+          ;(mesh as any).imageData = imgData
+          ;(mesh as any).originalPosition = new THREE.Vector3(x, y, z)
 
-        sphereGroup.add(mesh)
-        imagesMeshes.push({ mesh, imageData: imgData })
-      })
+          sphereGroup.add(mesh)
+          imagesMeshes.push({ mesh, imageData: imgData })
+        },
+        undefined,
+        (error) => {
+          console.warn(`[v0] Failed to load texture for ${imgData.src}:`, error)
+          // Create a placeholder mesh even if texture fails
+          const material = new THREE.MeshStandardMaterial({
+            color: 0x333333,
+            emissive: new THREE.Color(0x00d4ff),
+            emissiveIntensity: 0.1,
+          })
+
+          const mesh = new THREE.Mesh(geometry, material)
+          mesh.position.set(x, y, z)
+
+          const direction = new THREE.Vector3(x, y, z).normalize()
+          mesh.lookAt(direction.multiplyScalar(RADIUS + 100))
+
+          ;(mesh as any).imageData = imgData
+          ;(mesh as any).originalPosition = new THREE.Vector3(x, y, z)
+
+          sphereGroup.add(mesh)
+          imagesMeshes.push({ mesh, imageData: imgData })
+        }
+      )
     })
 
     // LIGHTING
@@ -227,7 +252,7 @@ export function DomeGallery({ onClose }: { onClose?: () => void }) {
       )}
 
       {/* Canvas Container */}
-      <div ref={containerRef} className="w-full h-screen bg-black relative overflow-hidden" />
+      <div ref={containerRef} className="w-full h-full bg-[#0a0812] relative overflow-hidden" />
 
       {/* Expanded Image Modal */}
       <AnimatePresence>

@@ -115,7 +115,7 @@ export default function BirthdayPage() {
                     setShowMemoryWall(false)
                   }
                 }}
-                className="fixed inset-0 z-[999] bg-black/90"
+                className="fixed inset-0 z-[999]"
               >
                 <MemoryDomeGallery onClose={() => setShowMemoryWall(false)} />
               </motion.div>
