@@ -1,7 +1,7 @@
 'use client'
 
-import { DomeGallery } from '@/components/dome-gallery'
+import { CSSdomGallery } from '@/components/css-dome-gallery'
 
 export function MemoryDomeGallery({ onClose }: { onClose?: () => void }) {
-  return <DomeGallery onClose={onClose} />
+  return <CSSdomGallery onClose={onClose} />
 }
