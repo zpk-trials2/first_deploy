@@ -8,7 +8,7 @@ import { allMemories, MemoryItem } from '@/lib/memories.extended'
 import { AudioPlayer } from './audio-player'
 import './DomeGallery.css'
 
-export function MemoryDomeGallery() {
+export function MemoryDomeGallery({ onClose }: { onClose?: () => void }) {
   const [expandedMemory, setExpandedMemory] = useState<MemoryItem | null>(null)
   const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
   const emojiRainfallRef = useRef<HTMLDivElement>(null)
@@ -107,6 +107,29 @@ export function MemoryDomeGallery() {
           }
         }
       `}</style>
+
+      {/* Back Button */}
+      {onClose && (
+        <motion.button
+          onClick={onClose}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="fixed top-6 left-6 z-[1000] p-3 rounded-full flex items-center justify-center transition-all"
+          style={{
+            background: 'linear-gradient(135deg, #00d4ff, #764ba2)',
+            boxShadow: '0 0 20px rgba(0, 212, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3)',
+            color: '#fff',
+          }}
+          title="Return to main page"
+          aria-label="Back"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </motion.button>
+      )}
 
       {/* DomeGallery Component */}
       <div style={{ width: '100%', height: '100%', position: 'relative' }}>
