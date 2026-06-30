@@ -12,6 +12,7 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer'
 import html2canvas from 'html2canvas'
+import DomeGallery from '@/components/DomeGallery'
 
 interface Coupon {
   id: string
@@ -87,6 +88,7 @@ export function FriendshipCoupons() {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [showMemoryWall, setShowMemoryWall] = useState(false)
   const receiptRef = useRef<HTMLDivElement>(null)
 
   const generateReceipt = useCallback(async (coupon: Coupon) => {
@@ -129,6 +131,60 @@ export function FriendshipCoupons() {
 
   return (
     <>
+      {/* Memory Wall Button - Above Cart */}
+      <motion.button
+        onClick={() => setShowMemoryWall(true)}
+        className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center"
+        style={{
+          background: 'linear-gradient(135deg, #00d4ff, #764ba2)',
+          boxShadow: '0 0 25px rgba(0, 212, 255, 0.4), 0 4px 15px rgba(0, 0, 0, 0.3)',
+        }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 2.1, type: 'spring' }}
+        title="View Memory Wall"
+      >
+        <span className="text-xl">🖼️</span>
+      </motion.button>
+
+      {/* Memory Wall Modal */}
+      <AnimatePresence>
+        {showMemoryWall && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center"
+            onClick={() => setShowMemoryWall(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full h-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowMemoryWall(false)}
+                className="absolute top-6 right-6 z-[10000] p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+              <DomeGallery
+                fit={0.8}
+                minRadius={600}
+                maxVerticalRotationDeg={0}
+                segments={34}
+                dragDampening={2}
+                grayscale
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Fixed cart icon */}
       <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
         <DrawerTrigger asChild>
