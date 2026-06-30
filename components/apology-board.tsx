@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import confetti from 'canvas-confetti'
+import DomeGallery from '@/components/DomeGallery'
 
 interface Apology {
   id: string
@@ -75,6 +76,7 @@ export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => 
   const [isOpen, setIsOpen] = useState(false)
   const [acceptedApologies, setAcceptedApologies] = useState<Set<string>>(new Set())
   const [showMore, setShowMore] = useState(false)
+  const [showMemoryWall, setShowMemoryWall] = useState(false)
 
   const visibleApologies = showMore ? APOLOGIES : APOLOGIES.slice(0, 6)
 
@@ -308,7 +310,7 @@ export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => 
 
       {/* Memory Wall Button - positioned above Apologies */}
       <motion.button
-        onClick={onMemoryWallClick}
+        onClick={() => setShowMemoryWall(true)}
         className="fixed bottom-20 left-6 z-40 px-4 py-2 rounded-full flex items-center gap-2"
         style={{
           background: 'linear-gradient(135deg, #00d4ff, #764ba2)',
@@ -324,6 +326,42 @@ export function ApologyBoard({ onMemoryWallClick }: { onMemoryWallClick?: () => 
       >
         <span className="text-sm font-medium">Memory Wall</span>
       </motion.button>
+
+      {/* Memory Wall Modal */}
+      <AnimatePresence>
+        {showMemoryWall && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center"
+            onClick={() => setShowMemoryWall(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative w-full h-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowMemoryWall(false)}
+                className="absolute top-6 right-6 z-[10000] p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="w-6 h-6 text-white" />
+              </button>
+              <DomeGallery
+                fit={0.8}
+                minRadius={600}
+                maxVerticalRotationDeg={0}
+                segments={34}
+                dragDampening={2}
+                grayscale
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
